@@ -11,7 +11,7 @@ class DSQL_Queries:
     
     def __init__(self, resfile):
         csv.field_size_limit(int(sys.maxsize/10))
-        self.con = sqlite3.connect('/home/pranav/catalog_experiments/datavault_synthetic.db')
+        self.con = sqlite3.connect('datavault_synthetic.db')
         self.resfile = resfile
     
     def create_out(self, resfile):
@@ -33,7 +33,7 @@ class DSQL_Queries:
     
     def make_query(self, tname):
         query = 'INSERT INTO ' + tname.lower() + ' VALUES ('
-        con = sqlite3.connect('/home/pranav/catalog_experiments/datavault_synthetic.db')
+        con = sqlite3.connect('datavault_synthetic.db')
         cur = con.cursor()
         schema = cur.execute("PRAGMA table_info('" + tname + "')").fetchall()
         con.close()

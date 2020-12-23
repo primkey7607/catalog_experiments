@@ -1,6 +1,5 @@
 import csv
 import datetime
-import pandas as pd
 import sqlite3
 import sys
 import cProfile, pstats
@@ -77,7 +76,7 @@ class NSQL_Queries:
     
     def execute_q1(self):
         tname = 'WhatProfile'
-        dname = '/home/pranav/catalog-service/' + tname
+        dname = '/home/pranav/catalog_experiments/' + tname
         query_num = 1
         numrows = 0
         last_id = self.get_lastId(tname)
@@ -270,10 +269,10 @@ class NSQL_Queries:
             why_inserts.append(newrow)
             
         #get the inserts for all the other tables
-        who_rows, who_len, who_query, who_inserts = self.get_q3inserts(x, '/home/pranav/catalog-service/'+ who_name, who_name, who_id, common_asset, who_schema)
+        who_rows, who_len, who_query, who_inserts = self.get_q3inserts(x, '/home/pranav/catalog_experiments/'+ who_name, who_name, who_id, common_asset, who_schema)
         #get the inserts for all the other tables
-        when_rows, when_len, when_query, when_inserts = self.get_q3inserts(x, '/home/pranav/catalog-service/'+ when_name, when_name, when_id, common_asset)
-        how_rows, how_len, how_query, how_inserts = self.get_q3inserts(x, '/home/pranav/catalog-service/'+ how_name, how_name, how_id, common_asset, how_schema)
+        when_rows, when_len, when_query, when_inserts = self.get_q3inserts(x, '/home/pranav/catalog_experiments/'+ when_name, when_name, when_id, common_asset)
+        how_rows, how_len, how_query, how_inserts = self.get_q3inserts(x, '/home/pranav/catalog_experiments/'+ how_name, how_name, how_id, common_asset, how_schema)
         
         #now, set actions
         action_inserts = []
