@@ -5,6 +5,7 @@ import random
 import string
 import sys
 import sqlite3
+from tqdm import tqdm
 
 class GenNSQLCSV:
     
@@ -417,7 +418,7 @@ class GenNSQLCSV:
         #first, it looks like we have some big fields, so...
         csv.field_size_limit(int(sys.maxsize/10))
         con = sqlite3.connect('normalized_synthetic.db')
-        for key in self.ins_map:
+        for key in tqdm(self.ins_map):
             inserts = []
             rowlen = -1
             numrows = 0
@@ -438,8 +439,8 @@ class GenNSQLCSV:
             query = query[:-1] + ');'
             print("Executing: " + query)
             cur = con.cursor()
-            cur.executemany(query, inserts)
-            con.commit()
+            #cur.executemany(query, inserts)
+            #con.commit()
         con.close()
 
 
@@ -447,13 +448,13 @@ if __name__ == "__main__":
     #csv_creator = GenNSQLCSV(10000,10000,5,10000,10000)
     #The above generates a 0.014 GB normalized database
     #And a 0.029 GB datavault database
-    #csv_creator = GenNSQLCSV(100000,100000,5,10000,10000)
+    csv_creator = GenNSQLCSV(100000,100000,5,10000,10000)
     #The above generates 0.129978368 GB normalized
     #0.26914816 GB datavault
     #So, the below should generate 12GB and 26GB databases, but let's see
-    csv_creator = GenNSQLCSV(10000000,10000000,5,10000,10000)
+    #csv_creator = GenNSQLCSV(10000000,10000000,5,10000,10000)
     csv_creator.run_full()
     csv_creator.close_all()
     #Since performing the inserts has a problem, we won't do that for now
     #we'll just generate the CSVs, and then manually import the files
-    #csv_creator.perform_inserts()
+    csv_creator.perform_inserts()
