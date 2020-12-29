@@ -439,6 +439,10 @@ class GenNSQLCSV:
         #first, it looks like we have some big fields, so...
         csv.field_size_limit(int(sys.maxsize/10))
         con = sqlite3.connect('normalized_synthetic.db')
+        cur = con.cursor()
+        cur.execute("PRAGMA synchronous = OFF")
+        cur.execute("PRAGMA journal_mode = MEMORY")
+        cur.close()
         for key in tqdm(self.ins_map):
             inserts = []
             rowlen = -1

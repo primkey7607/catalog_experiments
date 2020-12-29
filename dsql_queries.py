@@ -97,7 +97,8 @@ class DSQL_Queries:
         cur.close()
     
     def execute_q2(self):
-        h_asset_id = self.get_lastId('H_Asset') + 1
+        #adds howprofiles to the last asset
+        h_asset_id = self.get_lastId('H_Asset')
         h_profid = self.get_lastId('H_HowProfile') + 1
         l_profid = self.get_lastId('L_Asset_HowProfile') + 1
         s_profid = self.get_lastId('S_HowProfile_schema') + 1

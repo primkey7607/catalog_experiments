@@ -14,8 +14,8 @@ class GenDSQLRecords:
         self.version = 1
         self.con = None
         self.asset_names = []
-        #self.ins_map = {}
-        #self.create_tables()
+        self.ins_map = {}
+        self.create_tables()
         self.keymap = {}
         self.init_keymap()
         self.csv_map = {}
@@ -1186,11 +1186,11 @@ class GenDSQLRecords:
         cur.execute("PRAGMA synchronous = OFF")
         cur.execute("PRAGMA journal_mode = MEMORY")
         cur.close()
-        #self.create_type_records()
-        #self.create_all_users()
-        #self.create_all_assets()
-        #self.create_all_sources()
-        #self.create_all_relationships()
+        self.create_type_records()
+        self.create_all_users()
+        self.create_all_assets()
+        self.create_all_sources()
+        self.create_all_relationships()
         self.create_records_per_table()
         self.create_all_actions()
         
