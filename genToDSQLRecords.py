@@ -292,14 +292,14 @@ class GenDSQLRecords:
                                     user_id])
             h_chunksize += 1
             s_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_user_query, h_usertype_recs)
                 h_usertype_recs = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -335,14 +335,14 @@ class GenDSQLRecords:
                                      str(self.version), timestamp, user_id])
             h_chunksize += 1
             s_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_a_query, h_assettype_recs)
                 h_assettype_recs = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -374,14 +374,14 @@ class GenDSQLRecords:
             s_relationshiptype_recs.append([pid, name, desc, self.version, timestamp, user_id])
             h_chunksize += 1
             s_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_r_query, h_relationshiptype_recs)
                 h_relationshiptype_recs = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -415,14 +415,14 @@ class GenDSQLRecords:
                                      self.version, timestamp, user_id])
             h_chunksize += 1
             s_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_s_query, h_sourcetype_recs)
                 h_sourcetype_recs = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -473,21 +473,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             s_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_query, h_user_recs)
                 h_user_recs = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_query, s_user_recs)
                 s_user_recs = []
                 s_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -532,14 +532,14 @@ class GenDSQLRecords:
                           pid, atype, self.version, self.random_date(), user_id])
             h_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_query, h_recs)
                 h_recs = []
                 h_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -588,21 +588,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             l_chunksize += 1
             s_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_query, h_recs)
                 h_recs = []
                 h_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
                 self.insertToDB(self.con, l_query, l_recs)
                 l_recs = []
                 l_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -659,21 +659,21 @@ class GenDSQLRecords:
         #     h_chunksize += 1
         #     l_chunksize += 1
         #     s_chunksize += 1
-        #     if h_chunksize >= 100000:
+        #     if h_chunksize >= 1000:
         #         h_chunknum += 1
         #         print("Inserting through row: " + str(i))
         #         print("Inserting h_Chunk Number: " + str(h_chunknum))
         #         self.insertToDB(self.con, h_query, h_recs)
         #         h_recs = []
         #         h_chunksize = 0
-        #     if l_chunksize >= 100000:
+        #     if l_chunksize >= 1000:
         #         l_chunknum += 1
         #         print("Inserting through row: " + str(i))
         #         print("Inserting l_Chunk Number: " + str(l_chunknum))
         #         self.insertToDB(self.con, l_query, l_recs)
         #         l_recs = []
         #         l_chunksize = 0
-        #     if s_chunksize >= 100000:
+        #     if s_chunksize >= 1000:
         #         s_chunknum += 1
         #         print("Inserting through row: " + str(i))
         #         print("Inserting s_Chunk Number: " + str(s_chunknum))
@@ -701,7 +701,7 @@ class GenDSQLRecords:
             l_ar.append([self.keymap['L_Asset_Relationships'],
                          asset_id, r_id, ver, date, uid])
             la_chunksize += 1
-            if la_chunksize >= 100000:
+            if la_chunksize >= 1000:
                 la_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(la_chunknum))
@@ -756,28 +756,28 @@ class GenDSQLRecords:
             s_chunksize += 1
             la_chunksize += 1
             lu_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_who_query, h_who)
                 h_who = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_who_query, s_who)
                 s_who = []
                 s_chunksize = 0
-            if la_chunksize >= 100000:
+            if la_chunksize >= 1000:
                 la_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(la_chunknum))
                 self.insertToDB(self.con, l_awho_query, l_who)
                 l_who = []
                 la_chunksize = 0
-            if lu_chunksize >= 100000:
+            if lu_chunksize >= 1000:
                 lu_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(lu_chunknum))
@@ -828,21 +828,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             s_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_what_query, h_what)
                 h_what = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_what_query, s_what)
                 s_what = []
                 s_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -889,21 +889,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             s_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_how_query, h_how)
                 h_how = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_how_query, s_how)
                 s_how = []
                 s_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -950,21 +950,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             s_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_why_query, h_why)
                 h_why = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_why_query, s_why)
                 s_why = []
                 s_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -1013,21 +1013,21 @@ class GenDSQLRecords:
             h_chunksize += 1
             s_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_when_query, h_when)
                 h_when = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_when_query, s_when)
                 s_when = []
                 s_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))
@@ -1084,28 +1084,28 @@ class GenDSQLRecords:
             s_chunksize += 1
             la_chunksize += 1
             ls_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_where_query, h_where)
                 h_where = []
                 h_chunksize = 0
-            if s_chunksize >= 100000:
+            if s_chunksize >= 1000:
                 s_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting s_Chunk Number: " + str(s_chunknum))
                 self.insertToDB(self.con, s_where_query, s_where)
                 s_where = []
                 s_chunksize = 0
-            if la_chunksize >= 100000:
+            if la_chunksize >= 1000:
                 la_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(la_chunknum))
                 self.insertToDB(self.con, la_where_query, l_where)
                 l_where = []
                 la_chunksize = 0
-            if ls_chunksize >= 100000:
+            if ls_chunksize >= 1000:
                 ls_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(ls_chunknum))
@@ -1156,14 +1156,14 @@ class GenDSQLRecords:
                               pid, aid, who, why, when, how, ver, date, uid])
             h_chunksize += 1
             l_chunksize += 1
-            if h_chunksize >= 100000:
+            if h_chunksize >= 1000:
                 h_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting h_Chunk Number: " + str(h_chunknum))
                 self.insertToDB(self.con, h_action_query, h_actions)
                 h_actions = []
                 h_chunksize = 0
-            if l_chunksize >= 100000:
+            if l_chunksize >= 1000:
                 l_chunknum += 1
                 print("Inserting through row: " + str(i))
                 print("Inserting l_Chunk Number: " + str(l_chunknum))

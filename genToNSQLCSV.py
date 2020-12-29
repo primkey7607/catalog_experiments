@@ -414,6 +414,27 @@ class GenNSQLCSV:
         for key in self.fh_map:
             self.fh_map[key].close()
     
+    def make_query(self, tname):
+        query = 'INSERT INTO ' + tname.lower() + ' VALUES ('
+        con = sqlite3.connect('/home/pranav/catalog_experiments/normalized_synthetic.db')
+        cur = con.cursor()
+        schema = cur.execute("PRAGMA table_info('" + tname + "');").fetchall()
+        con.close()
+        rowlen = len(schema)
+        for i in range(rowlen):
+            query += '?,'
+        query = query[:-1] + ');'
+        return query
+    
+    def insertToDB(self, con, query_str, queries):
+        print("About to Execute: " + query_str)
+        cur = con.cursor()
+        cur.executemany(query_str, queries)
+        con.commit()
+        #close the cursor--maybe we're leaving too many of these around,
+        #and that's slowing things down
+        cur.close()
+    
     def perform_inserts(self):
         #first, it looks like we have some big fields, so...
         csv.field_size_limit(int(sys.maxsize/10))
@@ -422,25 +443,28 @@ class GenNSQLCSV:
             inserts = []
             rowlen = -1
             numrows = 0
+            chunksize = 0
+            chunknum = 0
+            query_str = self.make_query(key)
             with open(key + '.csv', 'r') as fh:
                 csvreader = csv.reader(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                for row in csvreader:
+                for i,row in enumerate(csvreader):
                     rowlen = len(row)
                     numrows += 1
                     if rowlen == 0:
                         continue
                     inserts.append(row)
-            #construct the query
-            if numrows == 0:
-                continue
-            query = 'INSERT INTO ' + key.lower() + ' VALUES ('
-            for i in range(rowlen):
-                query += '?,'
-            query = query[:-1] + ');'
-            print("Executing: " + query)
-            cur = con.cursor()
-            #cur.executemany(query, inserts)
-            #con.commit()
+                    if chunksize >= 1000:
+                        chunknum += 1
+                        print("Inserting through row: " + str(i))
+                        print("Inserting Chunk Number: " + str(chunknum))
+                        self.insertToDB(con, query_str, inserts)
+                        inserts = []
+                        chunksize = 0
+                
+            if len(inserts) > 0:
+                self.insertToDB(con, query_str, inserts)
+                inserts = []
         con.close()
 
 
