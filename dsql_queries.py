@@ -12,6 +12,10 @@ class DSQL_Queries:
     def __init__(self, resfile):
         csv.field_size_limit(int(sys.maxsize/10))
         self.con = sqlite3.connect('datavault_synthetic.db')
+        #make sure the sqlite database is enforcing foreign key constraints
+        cur = self.con.cursor()
+        cur.execute('PRAGMA foreign_keys = ON;')
+        cur.close()
         self.resfile = resfile
     
     def create_out(self, resfile):
