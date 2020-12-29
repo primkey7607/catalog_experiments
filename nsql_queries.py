@@ -321,7 +321,7 @@ class NSQL_Queries:
             f.write(s.getvalue())
         
     
-    def execute_q4(self):
+    def execute_q4(self, trial):
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -332,10 +332,10 @@ class NSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q4_nsql_test.txt', 'w+') as f:
+        with open('q4_nsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q5(self):
+    def execute_q5(self, trial):
         query_str = "SELECT user.name, howprofile.schema, whenprofile.asset_timestamp, whyprofile.schema "
         query_str += "FROM action INNER JOIN whoprofile ON action.who_id = whoprofile.id "
         query_str += "INNER JOIN whyprofile ON action.why_id = whyprofile.id "
@@ -353,10 +353,10 @@ class NSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q5_nsql_test.txt', 'w+') as f:
+        with open('q5_nsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q6(self):
+    def execute_q6(self, trial):
         query_str = "SELECT whoprofile.schema, howprofile.schema, whenprofile.asset_timestamp, whyprofile.schema FROM action "
         query_str += "INNER JOIN whoprofile ON action.who_id = whoprofile.id "
         query_str += "INNER JOIN whyprofile ON action.why_id = whyprofile.id "
@@ -374,10 +374,10 @@ class NSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q6_nsql_test.txt', 'w+') as f:
+        with open('q6_nsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q7(self):
+    def execute_q7(self, trial):
         query_str = "SELECT asset.name, COUNT(*) FROM howprofile INNER JOIN asset "
         query_str += "ON howprofile.asset_id = asset.id GROUP BY howprofile.asset_id;"
         
@@ -391,17 +391,19 @@ class NSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q7_nsql_test.txt', 'w+') as f:
+        with open('q7_nsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
     def execute_full(self):
         self.execute_q1()
         self.execute_q2()
         self.execute_q3(100000)
-        self.execute_q4()
-        self.execute_q5()
-        self.execute_q6()
-        self.execute_q7()
+        #repeat the other experiments 5 times
+        for i in range(1, 6):
+            self.execute_q4(i)
+            self.execute_q5(i)
+            self.execute_q6(i)
+            self.execute_q7(i)
         
         
         

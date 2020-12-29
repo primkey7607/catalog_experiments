@@ -386,7 +386,7 @@ class DSQL_Queries:
         
         cur.close()
     
-    def execute_q4(self):
+    def execute_q4(self, trial):
         cur = self.con.cursor()
         q4str = 'SELECT * FROM h_whatprofile '
         q4str += 'INNER JOIN s_whatprofile_schema ON h_whatprofile.id = s_whatprofile_schema.what_profile_id '
@@ -400,10 +400,10 @@ class DSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q4_dsql_test.txt', 'w+') as f:
+        with open('q4_dsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q5(self):
+    def execute_q5(self, trial):
         query_str = "SELECT h_user.name, s_howprofile_schema.schema, s_whenprofile_attributes.asset_timestamp, s_whyprofile_schema.schema "
         query_str += "FROM l_assetsinactions INNER JOIN h_whoprofile ON l_assetsinactions.who_profile_id = h_whoprofile.id "
         query_str += "INNER JOIN s_whoprofile_schema ON s_whoprofile_schema.who_profile_id = h_whoprofile.id "
@@ -426,10 +426,10 @@ class DSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q5_dsql_test.txt', 'w+') as f:
+        with open('q5_dsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q6(self):
+    def execute_q6(self, trial):
         query_str = "SELECT s_whoprofile_schema.schema, s_howprofile_schema.schema, s_whenprofile_attributes.asset_timestamp, s_whyprofile_schema.schema "
         query_str += "FROM l_assetsinactions INNER JOIN h_whoprofile ON l_assetsinactions.who_profile_id = h_whoprofile.id "
         query_str += "INNER JOIN s_whoprofile_schema ON s_whoprofile_schema.who_profile_id = h_whoprofile.id "
@@ -451,10 +451,10 @@ class DSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q6_dsql_test.txt', 'w+') as f:
+        with open('q6_dsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
-    def execute_q7(self):
+    def execute_q7(self, trial):
         query_str = "SELECT h_asset.name, COUNT(*) FROM h_howprofile INNER JOIN l_asset_howprofile "
         query_str += "ON h_howprofile.id = l_asset_howprofile.how_profile_id "
         query_str += "INNER JOIN h_asset ON l_asset_howprofile.asset_id = h_asset.id GROUP BY l_asset_howprofile.asset_id;"
@@ -468,17 +468,19 @@ class DSQL_Queries:
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
         ps.print_stats()
         
-        with open('q7_dsql_test.txt', 'w+') as f:
+        with open('q7_dsql_test_' + str(trial) + '.txt', 'w+') as f:
             f.write(s.getvalue())
     
     def execute_full(self):
         self.execute_q1(100000)
         self.execute_q2()
         self.execute_q3(100000)
-        self.execute_q4()
-        self.execute_q5()
-        self.execute_q6()
-        self.execute_q7()
+        #repeat the other experiments 5 times
+        for i in range(1, 6):
+            self.execute_q4(i)
+            self.execute_q5(i)
+            self.execute_q6(i)
+            self.execute_q7(i)
     
     
         
