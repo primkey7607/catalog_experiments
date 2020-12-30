@@ -154,7 +154,7 @@ class GenNSQLCSV:
             #self.csv_map[key].writeheader()
     
     def random_date(self):
-        start = datetime.datetime.strptime('6/1/2020 12:00 AM', '%m/%d/%Y %I:%M %p')
+        start = datetime.datetime.strptime('6/10/2020 12:00 AM', '%m/%d/%Y %I:%M %p')
         end = datetime.datetime.now()
         delta = end - start
         int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
