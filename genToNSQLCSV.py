@@ -458,6 +458,7 @@ class GenNSQLCSV:
                     if rowlen == 0:
                         continue
                     inserts.append(row)
+                    chunksize += 1
                     if chunksize >= 1000:
                         chunknum += 1
                         print("Inserting through row: " + str(i))
