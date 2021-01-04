@@ -325,7 +325,7 @@ class NSQL_Queries:
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
-        cur.execute('SELECT * FROM whatprofile WHERE timestamp <= date(\'now\', \'+1 day\') AND timestamp >= date(\'now\', \'-11 day\')')
+        cur.execute('SELECT * FROM whatprofile WHERE timestamp <= date(\'2020-12-20\') AND timestamp >= date(\'2020-11-01\')')
         pr.disable()
         self.con.commit()
         s = io.StringIO()
@@ -399,7 +399,8 @@ class NSQL_Queries:
         self.execute_q2()
         self.execute_q3(100000)
         #repeat the other experiments 5 times
-        for i in range(1, 6):
+        for i in range(6):
+            #we get 2407903 records from executing q4
             self.execute_q4(i)
             self.execute_q5(i)
             self.execute_q6(i)

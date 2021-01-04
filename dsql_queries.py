@@ -390,7 +390,7 @@ class DSQL_Queries:
         cur = self.con.cursor()
         q4str = 'SELECT * FROM h_whatprofile '
         q4str += 'INNER JOIN s_whatprofile_schema ON h_whatprofile.id = s_whatprofile_schema.what_profile_id '
-        q4str += 'WHERE h_whatprofile.timestamp <= date(\'now\', \'+1 day\') AND h_whatprofile.timestamp >= date(\'now\', \'-11 day\')'
+        q4str += 'WHERE h_whatprofile.timestamp <= date(\'2020-12-20\') AND h_whatprofile.timestamp >= date(\'2020-11-01\');'
         pr = cProfile.Profile()
         pr.enable()
         cur.execute(q4str)
@@ -476,7 +476,7 @@ class DSQL_Queries:
         self.execute_q2()
         self.execute_q3(100000)
         #repeat the other experiments 5 times
-        for i in range(1, 6):
+        for i in range(6):
             self.execute_q4(i)
             self.execute_q5(i)
             self.execute_q6(i)
