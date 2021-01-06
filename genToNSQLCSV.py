@@ -480,8 +480,14 @@ if __name__ == "__main__":
     csv_creator = GenNSQLCSV(100000,100000,5,10000,10000)
     #The above generates 0.129978368 GB normalized
     #0.26914816 GB datavault
-    #So, the below should generate 12GB and 26GB databases, but let's see
+    #The below generates a 13.23 GB normalized DB,
+    #and a 27.93 GB datavault DB
+    #And the dataset itself is 9.42 GB
     #csv_creator = GenNSQLCSV(10000000,10000000,5,10000,10000)
+    #So, to generate a 50GB dataset, we need roughly 5.3 times the 
+    #number of records we have here. But our databases are going to be much larger
+    #than 50GB
+    #csv_creator = GenNSQLCSV(53000000,53000000,5,10000,10000)
     csv_creator.run_full()
     csv_creator.close_all()
     #Since performing the inserts has a problem, we won't do that for now

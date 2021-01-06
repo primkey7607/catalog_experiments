@@ -395,9 +395,9 @@ class NSQL_Queries:
             f.write(s.getvalue())
     
     def execute_full(self):
-        self.execute_q1()
-        self.execute_q2()
-        self.execute_q3(100000)
+        #self.execute_q1()
+        #self.execute_q2()
+        #self.execute_q3(100000)
         #repeat the other experiments 5 times
         for i in range(6):
             #we get 2407903 records from executing q4
