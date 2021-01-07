@@ -4,19 +4,21 @@ import random
 import string
 import sqlite3
 import sys
+import os
+import time
 import cProfile, pstats
 import io
 
 class DSQL_Queries:
     
-    def __init__(self, resfile):
+    def __init__(self, dbfile):
         csv.field_size_limit(int(sys.maxsize/10))
-        self.con = sqlite3.connect('datavault_synthetic.db')
+        self.dbfile = dbfile
+        self.con = sqlite3.connect(dbfile)
         #make sure the sqlite database is enforcing foreign key constraints
         cur = self.con.cursor()
         cur.execute('PRAGMA foreign_keys = ON;')
         cur.close()
-        self.resfile = resfile
     
     def create_out(self, resfile):
         fh = open(resfile, 'w+')
@@ -387,6 +389,9 @@ class DSQL_Queries:
         cur.close()
     
     def execute_q4(self, trial):
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         q4str = 'SELECT * FROM h_whatprofile '
         q4str += 'INNER JOIN s_whatprofile_schema ON h_whatprofile.id = s_whatprofile_schema.what_profile_id '
@@ -416,6 +421,9 @@ class DSQL_Queries:
         query_str += "INNER JOIN l_whoprofileuser ON l_whoprofileuser.who_profile_id = h_whoprofile.id "
         query_str += "INNER JOIN h_user ON l_whoprofileuser.who_user_id = h_user.id;"
         
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -441,6 +449,9 @@ class DSQL_Queries:
         query_str += "INNER JOIN s_howprofile_schema ON h_howprofile.id = s_howprofile_schema.how_profile_id "
         query_str += "ORDER BY l_assetsinactions.timestamp DESC LIMIT 10;"
         
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -458,6 +469,10 @@ class DSQL_Queries:
         query_str = "SELECT h_asset.name, COUNT(*) FROM h_howprofile INNER JOIN l_asset_howprofile "
         query_str += "ON h_howprofile.id = l_asset_howprofile.how_profile_id "
         query_str += "INNER JOIN h_asset ON l_asset_howprofile.asset_id = h_asset.id GROUP BY l_asset_howprofile.asset_id;"
+        
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -477,6 +492,8 @@ class DSQL_Queries:
         #self.execute_q3(100000)
         #repeat the other experiments 5 times
         for i in range(6):
+            os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+            time.sleep(5)
             self.execute_q4(i)
             self.execute_q5(i)
             self.execute_q6(i)
@@ -486,6 +503,6 @@ class DSQL_Queries:
         
 
 if __name__ == "__main__":
-    run_tests = DSQL_Queries("testres.csv")
+    run_tests = DSQL_Queries('datavault_synthetic.db')
     run_tests.execute_full()
     run_tests.close_conn()
