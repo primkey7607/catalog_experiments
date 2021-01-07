@@ -9,6 +9,7 @@ class NSQL_Queries:
     
     def __init__(self, dbfile, resfile):
         csv.field_size_limit(int(sys.maxsize/10))
+        self.dbfile = dbfile
         self.con = sqlite3.connect(dbfile)
         #make sure the sqlite database is enforcing foreign key constraints
         cur = self.con.cursor()
@@ -322,6 +323,9 @@ class NSQL_Queries:
         
     
     def execute_q4(self, trial):
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -343,6 +347,9 @@ class NSQL_Queries:
         query_str += "INNER JOIN howprofile ON action.how_id = howprofile.id "
         query_str += "INNER JOIN user ON whoprofile.write_user_id;"
         
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -364,6 +371,9 @@ class NSQL_Queries:
         query_str += "INNER JOIN howprofile ON action.how_id = howprofile.id "
         query_str += "ORDER BY action.timestamp DESC LIMIT 10;"
         
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -381,6 +391,9 @@ class NSQL_Queries:
         query_str = "SELECT asset.name, COUNT(*) FROM howprofile INNER JOIN asset "
         query_str += "ON howprofile.asset_id = asset.id GROUP BY howprofile.asset_id;"
         
+        #reinitialize the db connection
+        self.con.close()
+        self.con = sqlite3.connect(self.dbfile)
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
