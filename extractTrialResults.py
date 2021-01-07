@@ -28,7 +28,7 @@ def extract_time_from_file(fname):
 
 def extract_times_to_csv(dirname):
     resfile = open(os.path.join(dirname, 'all_runtimes.csv'), 'w+')
-    resfile.write('Trial,Runtime (s)')
+    resfile.write('Trial,Runtime (s)\n')
     for file in os.listdir(dirname):
         if file.endswith(".txt"): #this should be enough of a screen
             fpath = os.path.join(dirname, file)
@@ -36,7 +36,7 @@ def extract_times_to_csv(dirname):
             runtime = extract_time_from_file(fpath)
             print(file[-5])
             trial_num = int(file[-5])
-            resfile.write(str(trial_num) + ',' + str(runtime))
+            resfile.write(str(trial_num) + ',' + str(runtime) + '\n')
     
     resfile.close()
     
