@@ -2,6 +2,8 @@ import csv
 import datetime
 import sqlite3
 import sys
+import os
+import time
 import cProfile, pstats
 import io
 
@@ -414,6 +416,9 @@ class NSQL_Queries:
         #repeat the other experiments 5 times
         for i in range(6):
             #we get 2407903 records from executing q4
+            #drop the cache before executing anything
+            os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+            time.sleep(5)
             self.execute_q4(i)
             self.execute_q5(i)
             self.execute_q6(i)
