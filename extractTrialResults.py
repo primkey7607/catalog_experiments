@@ -49,7 +49,7 @@ def extract_times_to_csv(dirname):
     for i in trial_nums:
         toWrite = str(i) + ','
         for k in resdict:
-            toWrite += resdict[k][i] + ','
+            toWrite += str(resdict[k][i]) + ','
         toWrite = toWrite[:-1] + '\n'
         resfile.write(toWrite)
     resfile.close()
