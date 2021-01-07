@@ -27,17 +27,31 @@ def extract_time_from_file(fname):
 #extract_time_from_file('q4_nsql_test_0.txt')
 
 def extract_times_to_csv(dirname):
-    resfile = open(os.path.join(dirname, 'all_runtimes.csv'), 'w+')
-    resfile.write('Trial,Runtime (s)\n')
+    resdict = {}
+    resdict['Q4'] = [None]*6
+    resdict['Q5'] = [None]*6
+    resdict['Q6'] = [None]*6
+    resdict['Q7'] = [None]*6
     for file in os.listdir(dirname):
-        if file.endswith(".txt"): #this should be enough of a screen
+        if file.endswith(".txt") and file[0] == 'q': #this should be enough of a screen
             fpath = os.path.join(dirname, file)
             print("fpath is: " + fpath)
             runtime = extract_time_from_file(fpath)
             print(file[-5])
             trial_num = int(file[-5])
-            resfile.write(str(trial_num) + ',' + str(runtime) + '\n')
+            print(file[1])
+            q_num = int(file[1])
+            q_key = 'Q' + str(q_num)
+            resdict[q_key][trial_num] = runtime
     
+    resfile = open(os.path.join(dirname, 'all_runtimes.csv'), 'w+')
+    resfile.write('Trial,Q4,Q5,Q6,Q7\n')
+    for i in trial_nums:
+        toWrite = str(i) + ','
+        for k in resdict:
+            toWrite += resdict[k][i] + ','
+        toWrite = toWrite[:-1] + '\n'
+        resfile.write(toWrite)
     resfile.close()
     
 extract_times_to_csv('/home/pranav/catalog_experiments/nsql1con')
