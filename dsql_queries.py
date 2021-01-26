@@ -322,7 +322,7 @@ class DSQL_Queries:
             h_actionid = last_haction + i + 1
             l_actionid = last_laction + i + 1
             ver = 1
-            date = self.random_date()
+            date = str(self.random_date())
             write_user = 1
             aid = random.choice(range(last_asset + 1, last_asset + 1 + x))
             uid = 1
