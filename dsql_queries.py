@@ -172,7 +172,7 @@ class DSQL_Queries:
         with open(dname + '.csv', 'r') as fh:
             csvreader = csv.reader(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             for row in csvreader:
-                if numrows >= 10000:
+                if numrows >= 100000:
                     break
                 rowlen = len(row)
                 numrows += 1
