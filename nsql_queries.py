@@ -305,8 +305,15 @@ class NSQL_Queries:
         asset_query = 'INSERT INTO asset VALUES (' + str(common_asset) + ', "fictionalAsset", ' + '4, 1, ' + '"' + str(datetime.datetime.now()) + '"' + ', 1);'
         print(asset_query)
         cur.execute(asset_query)
-        
+        print("who_inserts length: " + str(len(who_inserts)))
+        print("why_inserts length: " + str(len(why_inserts)))
+        print("how_inserts length: " + str(len(how_inserts)))
+        print("when_inserts length: " + str(len(when_inserts)))
+        print("action_inserts length: " + str(len(action_inserts)))
         #now, we can insert everything else
+        
+        #os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+        #time.sleep(5)
         pr = cProfile.Profile()
         pr.enable()
         cur.executemany(who_query, who_inserts)
@@ -430,12 +437,12 @@ if __name__ == "__main__":
     run_tests = NSQL_Queries('normalized_synthetic.db', "testres.csv")
     #run_tests.execute_q1()
     #run_tests.execute_q2()
-    #run_tests.execute_q3()
+    run_tests.execute_q3(100000)
     #run_tests.execute_q4()
     #run_tests.execute_q5()
     #run_tests.execute_q6()
     #run_tests.execute_q7()
-    run_tests.execute_full()
+    #run_tests.execute_full()
     # tname = 'HowProfile'
     # tsize = 16655
     # numrows, rowlen, query_str, res_inserts = run_tests.get_inserts('/home/pranav/catalog-service/workingdbs/nsql/' + tname, tname, tsize)

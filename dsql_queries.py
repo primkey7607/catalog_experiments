@@ -250,7 +250,7 @@ class DSQL_Queries:
             name = ''.join(random.choices(string.ascii_letters, k=12))
             atype = 1 #just make them all the same type
             ver = 1
-            date = self.random_date()
+            date = str(self.random_date())
             uid = 1
             h_recs.append([h_pid, name, ver, date, uid])
             l_recs.append([l_pid, h_pid, atype, ver, date, uid])
@@ -266,7 +266,11 @@ class DSQL_Queries:
         how_schema = '\"{ curationProcess : Replaced all empty strings or negative numbers with NULLs }\"'
         start = datetime.datetime.strptime('6/1/2020 12:00 AM', '%m/%d/%Y %I:%M %p')
         end = datetime.datetime.now()
-        when_attrs = self.k_in_time(start, end, 3)
+        when_dates = self.k_in_time(start, end, 3)
+        when_attrs = []
+        #convert this to strings
+        for d in when_dates:
+            when_attrs.append(str(d))
         why_schema = '\"{ curationPurpose : We need this dataset cleaned before we can run prediction on it. }\"'
         
         last_hwho = self.get_lastId('H_WhoProfile')
@@ -359,6 +363,23 @@ class DSQL_Queries:
         l_action_query = self.make_query('l_assetsinactions')
         
         #now, we can insert everything else
+        #os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+        #time.sleep(5)
+        print("Length of who_query: " + str(len(h_who)))
+        print("Length of who_query: " + str(len(s_who)))
+        print("Length of who_query: " + str(len(l_who)))
+        print("Length of user_who: " + str(len(l_user)))
+        print("Length of why_query: " + str(len(h_why)))
+        print("Length of why_query: " + str(len(s_why)))
+        print("Length of why_query: " + str(len(l_why)))
+        print("Length of how_query: " + str(len(h_how)))
+        print("Length of how_query: " + str(len(s_how)))
+        print("Length of how_query: " + str(len(l_how)))
+        print("Length of when_query: " + str(len(h_when)))
+        print("Length of when_query: " + str(len(s_when)))
+        print("Length of when_query: " + str(len(l_when)))
+        print("Length of action_query: " + str(len(h_action)))
+        print("Length of action_query: " + str(len(l_action)))
         cur = self.con.cursor()
         pr = cProfile.Profile()
         pr.enable()
@@ -504,5 +525,6 @@ class DSQL_Queries:
 
 if __name__ == "__main__":
     run_tests = DSQL_Queries('datavault_synthetic.db')
-    run_tests.execute_full()
+    #run_tests.execute_full()
+    run_tests.execute_q3(100000)
     run_tests.close_conn()

@@ -54,4 +54,4 @@ def extract_times_to_csv(dirname):
         resfile.write(toWrite)
     resfile.close()
     
-extract_times_to_csv('/home/pranav/catalog_experiments/nsql1con')
+extract_times_to_csv('/home/pranav/catalog_experiments/dsqlres')
