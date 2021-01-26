@@ -363,8 +363,8 @@ class DSQL_Queries:
         l_action_query = self.make_query('l_assetsinactions')
         
         #now, we can insert everything else
-        #os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
-        #time.sleep(5)
+        os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+        time.sleep(5)
         print("Length of who_query: " + str(len(h_who)))
         print("Length of who_query: " + str(len(s_who)))
         print("Length of who_query: " + str(len(l_who)))
