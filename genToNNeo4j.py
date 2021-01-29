@@ -308,10 +308,10 @@ class GenNNeo4j:
                 session.run(query_str2, batch=batch)
                 query_str1 = self.create_relquery('HowProfile', 'User', 'user_id', 'id')
                 query_str2 = self.create_relquery('HowProfile', 'Asset', 'asset_id', 'id')
-                print(query_str1, batch=batch)
-                print(query_str2, batch=batch)
-                session.run(query_str1)
-                session.run(query_str2)
+                print(query_str1)
+                print(query_str2)
+                session.run(query_str1, batch=batch)
+                session.run(query_str2, batch=batch)
                 
         # elif tname == 'HowProfile':
         #     #['id', 'version', 'timestamp', 'user_id',
