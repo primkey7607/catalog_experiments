@@ -281,8 +281,8 @@ class GenNNeo4j:
             with self.driver.session() as session:
                 query_str1 = self.create_relquery('User', 'UserType', 'user_type_id', 'id')
                 query_str2 = self.create_relquery('User', 'User', 'user_id', 'id')
-                print(query_str1, batch=batch)
-                print(query_str2, batch=batch)
+                print(query_str1)
+                print(query_str2)
                 session.run(query_str1, batch=batch)
                 session.run(query_str2, batch=batch)
                 query_str1 = self.create_relquery('Asset', 'AssetType', 'asset_type_id', 'id')
