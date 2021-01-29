@@ -1212,7 +1212,7 @@ class GenDSQLRecords:
 
 if __name__ == "__main__":
     record_writer = GenDSQLRecords()
-    record_writer.run_full()
+    #record_writer.run_full()
     record_writer.close_all()
         
         

@@ -63,12 +63,20 @@ class GenNNeo4j:
         for i,a in enumerate(attrs):
             dtype = self.getDataType(a)
             type_str = ""
+            type_str1 = ''
+            type_str2 = ''
             if dtype == 'int':
                 type_str = 'toInteger'
             elif dtype == 'datetime':
-                type_str = 'toDateTime'
+                #type_str = 'toDateTime'
+                #type_str = 'date'
+                type_str = 'datetime'
+                type_str1 = 'datetime({epochMillis:apoc.date.parse('
+                type_str2 = ', \'ms\', \'yyyy-MM-dd HH:mm:ss\')})'
             
-            if type_str == "":
+            if dtype == 'datetime':
+                query_str += a + ": " + type_str1 + 'line[' + str(i) + ']' + type_str2 + ', '
+            elif type_str == "":
                 query_str += a + ": " + "line[" + str(i) + "], "
             else:
                 query_str += a + ": " + type_str + "(line[" + str(i) + "]), "
@@ -92,39 +100,47 @@ class GenNNeo4j:
         #RETURN type(r)
         query_str = "MATCH (a:" + t1 + "), (b:" + t2 + ") "
         query_str += "WHERE a." + k1 + " = b." + k2
-        query_str += " CREATE (a)-[r:RELTYPE]-(b) "
+        query_str += " CREATE (a)-[r:RELTYPE]->(b) "
         query_str += " RETURN type(r)"
         return query_str
     
     def load_relationship(self, tx, tname):
-        if 'Type' in tname:
-            return
-        elif tname == 'User':
+        if tname == 'User':
             query_str1 = self.create_relquery('User', 'UserType', 'user_type_id', 'id')
             query_str2 = self.create_relquery('User', 'User', 'user_id', 'id')
+            print(query_str1)
+            print(query_str2)
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'Asset':
             query_str1 = self.create_relquery('Asset', 'AssetType', 'asset_type_id', 'id')
             query_str2 = self.create_relquery('Asset', 'User', 'user_id', 'id')
+            print(query_str1)
+            print(query_str2)
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'WhoProfile':
             #['id', 'version', 'timestamp', 'write_user_id',
             #'asset_id', 'user_id', 'schema']
             query_str1 = self.create_relquery('WhoProfile', 'User', 'write_user_id', 'id')
             query_str2 = self.create_relquery('WhoProfile', 'User', 'user_id', 'id')
             query_str3 = self.create_relquery('WhoProfile', 'Asset', 'asset_id', 'id')
+            print(query_str1)
+            print(query_str2)
+            print(query_str3)
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
             result3 = tx.run(query_str3)
-            print(result1.single())
-            print(result2.single())
-            print(result3.single())
+            #print(result1.peek())
+            #print(result2.peek())
+            #print(result3.peek())
+            return result3.peek()
         elif tname == 'WhatProfile':
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'schema']
@@ -132,8 +148,11 @@ class GenNNeo4j:
             query_str2 = self.create_relquery('WhatProfile', 'Asset', 'asset_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'HowProfile':
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'schema']
@@ -141,15 +160,21 @@ class GenNNeo4j:
             query_str2 = self.create_relquery('HowProfile', 'Asset', 'asset_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'WhyProfile':
             query_str1 = self.create_relquery('WhyProfile', 'User', 'user_id', 'id')
             query_str2 = self.create_relquery('WhyProfile', 'Asset', 'asset_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'WhenProfile':
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'asset_timestamp',
@@ -158,17 +183,23 @@ class GenNNeo4j:
             query_str2 = self.create_relquery('WhenProfile', 'Asset', 'asset_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'Source':
             #['id', 'version', 'timestamp', 'user_id',
             #'name', 'source_type_id', 'schema']
             query_str1 = self.create_relquery('Source', 'User', 'user_id', 'id')
             query_str2 = self.create_relquery('Source', 'SourceType', 'source_type_id', 'id')
+            print(query_str1)
+            print(query_str2)
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'WhereProfile':
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'access_path', 'source_id', 'configuration']
@@ -178,9 +209,13 @@ class GenNNeo4j:
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
             result3 = tx.run(query_str3)
-            print(result1.single())
-            print(result2.single())
-            print(result3.single())
+            print(query_str1)
+            print(query_str2)
+            print(query_str3)
+            #print(result1.peek())
+            #print(result2.peek())
+            #print(result3.peek())
+            return result3.peek()
         elif tname == 'Relationship':
             #['id', 'version', 'timestamp', 'user_id',
             #'relationship_type_id', 'schema']
@@ -188,16 +223,22 @@ class GenNNeo4j:
             query_str2 = self.create_relquery('Relationship', 'RelationshipType', 'relationship_type_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'Asset_Relationships':
             #['id', 'asset_id', 'relationship_id']
             query_str1 = self.create_relquery('Asset_Relationships', 'Asset', 'asset_id', 'id')
             query_str2 = self.create_relquery('Asset_Relationships', 'Relationship', 'relationship_id', 'id')
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
-            print(result1.single())
-            print(result2.single())
+            print(query_str1)
+            print(query_str2)
+            #print(result1.peek())
+            #print(result2.peek())
+            return result2.peek()
         elif tname == 'Action':
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'who_id', 'how_id', 'why_id',
@@ -209,6 +250,13 @@ class GenNNeo4j:
             query_str5 = self.create_relquery('Action', 'HowProfile', 'how_id', 'id')
             query_str6 = self.create_relquery('Action', 'WhyProfile', 'why_id', 'id')
             query_str7 = self.create_relquery('Action', 'WhenProfile', 'when_id', 'id')
+            print(query_str1)
+            print(query_str2)
+            print(query_str3)
+            print(query_str4)
+            print(query_str5)
+            print(query_str6)
+            print(query_str7)
             result1 = tx.run(query_str1)
             result2 = tx.run(query_str2)
             result3 = tx.run(query_str3)
@@ -216,17 +264,20 @@ class GenNNeo4j:
             result5 = tx.run(query_str5)
             result6 = tx.run(query_str6)
             result7 = tx.run(query_str7)
-            print(result1.single())
-            print(result2.single())
-            print(result3.single())
-            print(result4.single())
-            print(result5.single())
-            print(result6.single())
-            print(result7.single())
+            #print(result1.peek())
+            #print(result2.peek())
+            #print(result3.peek())
+            #print(result4.peek())
+            #print(result5.peek())
+            #print(result6.peek())
+            #print(result7.peek())
+            return result7.peek()
             
     def load_all_relationships(self):
-        with self.driver.session() as session:
-            for tname in self.tableLst:
+        for tname in self.tableLst:
+            with self.driver.session() as session:
+                if 'Type' in tname:
+                   continue
                 res_msg = session.write_transaction(self.load_relationship, tname)
                 print(res_msg)
 
