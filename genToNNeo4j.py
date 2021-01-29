@@ -98,7 +98,7 @@ class GenNNeo4j:
         #WHERE a.name = 'A' AND b.name = 'B'
         #CREATE (a)-[r:RELTYPE]->(b)
         #RETURN type(r)
-        query_str = "USING PERIODIC COMMIT MATCH (a:" + t1 + "), (b:" + t2 + ") "
+        query_str = "MATCH (a:" + t1 + "), (b:" + t2 + ") "
         query_str += "WHERE a." + k1 + " = b." + k2
         query_str += " CREATE (a)-[r:RELTYPE]->(b);"
         return query_str
@@ -273,6 +273,7 @@ class GenNNeo4j:
             return result7.peek()
             
     def load_all_relationships(self):
+        batch = 1000
         for tname in self.tableLst:
             if 'Type' in tname:
                    continue
@@ -280,10 +281,10 @@ class GenNNeo4j:
             with self.driver.session() as session:
                 query_str1 = self.create_relquery('User', 'UserType', 'user_type_id', 'id')
                 query_str2 = self.create_relquery('User', 'User', 'user_id', 'id')
-                print(query_str1)
-                print(query_str2)
-                session.run(query_str1)
-                session.run(query_str2)
+                print(query_str1, batch=batch)
+                print(query_str2, batch=batch)
+                session.run(query_str1, batch=batch)
+                session.run(query_str2, batch=batch)
                 query_str1 = self.create_relquery('Asset', 'AssetType', 'asset_type_id', 'id')
                 query_str2 = self.create_relquery('Asset', 'User', 'user_id', 'id')
                 print(query_str1)
