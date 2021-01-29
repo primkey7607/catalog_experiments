@@ -275,9 +275,10 @@ class GenNNeo4j:
             
     def load_all_relationships(self):
         for tname in self.tableLst:
-            with self.driver.session() as session:
-                if 'Type' in tname:
+            if 'Type' in tname:
                    continue
+            print("Loading Relationships for Table: " + tname)
+            with self.driver.session() as session:
                 res_msg = session.write_transaction(self.load_relationship, tname)
                 print(res_msg)
 
