@@ -100,8 +100,7 @@ class GenNNeo4j:
         #RETURN type(r)
         query_str = "MATCH (a:" + t1 + "), (b:" + t2 + ") "
         query_str += "WHERE a." + k1 + " = b." + k2
-        query_str += " CREATE (a)-[r:RELTYPE]->(b) "
-        query_str += " RETURN type(r)"
+        query_str += " CREATE (a)-[r:RELTYPE]->(b);"
         return query_str
     
     def load_relationship(self, tx, tname):
