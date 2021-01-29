@@ -54,11 +54,11 @@ class GenNNeo4j:
         else:
             return 'string'
     
-    def load_table(self, tx, tname):
+    def load_table(self, tname):
         #LOAD CSV FROM '{csv-dir}/artists.csv' AS line
         #CREATE (:Artist { name: line[1], year: toInteger(line[2])})
         attrs = self.attrmap[tname]
-        query_str = "LOAD CSV FROM \'file:///home/pranav/catalog_experiments/" + tname + ".csv\' AS line "
+        query_str = "USING PERIODIC COMMIT LOAD CSV FROM \'file:///home/pranav/catalog_experiments/" + tname + ".csv\' AS line "
         query_str += "CREATE ( :" + tname + " { "
         for i,a in enumerate(attrs):
             dtype = self.getDataType(a)
@@ -83,15 +83,14 @@ class GenNNeo4j:
         
         query_str = query_str[:-2] + " })"
         
-        result = tx.run(query_str)
-        #return result.single()[0]
-        return result.single()
+        with self.driver.session() as session:
+            result = session.run(query_str)
+            return result.single()
     
     def load_all_tables(self):
-        with self.driver.session() as session:
-            for tname in self.tableLst:
-                res_msg = session.write_transaction(self.load_table, tname)
-                print(res_msg)
+        for tname in self.tableLst:
+            print("Now Loading: " + tname)
+            self.load_table(tname)
     
     def create_relquery(self, t1, t2, k1, k2):
         #sample: MATCH (a:Person),(b:Person)
