@@ -98,7 +98,7 @@ class GenNNeo4j:
         #WHERE a.name = 'A' AND b.name = 'B'
         #CREATE (a)-[r:RELTYPE]->(b)
         #RETURN type(r)
-        query_str = "MATCH (a:" + t1 + "), (b:" + t2 + ") "
+        query_str = "USING PERIODIC COMMIT MATCH (a:" + t1 + "), (b:" + t2 + ") "
         query_str += "WHERE a." + k1 + " = b." + k2
         query_str += " CREATE (a)-[r:RELTYPE]->(b);"
         return query_str
@@ -231,8 +231,8 @@ class GenNNeo4j:
             #['id', 'asset_id', 'relationship_id']
             query_str1 = self.create_relquery('Asset_Relationships', 'Asset', 'asset_id', 'id')
             query_str2 = self.create_relquery('Asset_Relationships', 'Relationship', 'relationship_id', 'id')
-            result1 = tx.run(query_str1, batch=10000)
-            result2 = tx.run(query_str2, batch=10000)
+            result1 = tx.run(query_str1)
+            result2 = tx.run(query_str2)
             print(query_str1)
             print(query_str2)
             #print(result1.peek())
