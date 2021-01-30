@@ -1,11 +1,15 @@
 from neo4j import GraphDatabase
 import os
+import datetime
+from neo4j.time import DateTime
+import random
 
 class GenNNeo4j:
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         self.attrmap = {}
         self.init_attrmap()
+        self.version = 1
     
     def init_attrmap(self):
         self.attrmap["H_UserType"] = ['id', 'version', 'timestamp',
@@ -105,6 +109,381 @@ class GenNNeo4j:
             return 'datetime'
         else:
             return 'string'
+    
+    def create_relquery(self, t1, t2, k1, k2):
+        #sample: MATCH (a:Person),(b:Person)
+        #WHERE a.name = 'A' AND b.name = 'B'
+        #CREATE (a)-[r:RELTYPE]->(b)
+        #RETURN type(r)
+        query_str = "MATCH (a:" + t1 + "), (b:" + t2 + ") "
+        query_str += "WHERE a." + k1 + " = b." + k2
+        query_str += " CREATE (a)-[r:RELTYPE]->(b);"
+        return query_str
+    
+    def insert_linkRel(self, t1, t2, k1, k2, lname, l_recs):
+        query_str = "UNWIND $props AS map MATCH (a:" + t1 + "), (b:" + t2 + ") "
+        query_str += "WHERE a." + k1 + " = b." + k2
+        query_str += " CREATE (a)-[r:" + lname + "]->(b) SET r = map;"
         
+        with self.driver.session() as session:
+            session.run(query_str, props=l_recs)
+    
+    def make_query(self, tname):
+        query_str = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        return query_str
+    
+    def insertToDB(self, tname, query_str, recs):
+        recmap = []
+        attrs = self.attrmap[tname]
+        for r in recs:
+            tmpdict = {}
+            for i,a in enumerate(attrs):
+                dtype = self.getDataType(a)
+                if dtype == 'int':
+                    tmpdict[a] = int(r[i])
+                elif dtype == 'datetime':
+                    dt = datetime.datetime.strptime(r[i], '%Y-%m-%d %H:%M:%S')
+                    nd = DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, float(dt.second))
+                    tmpdict[a] = nd
+                else:
+                    tmpdict[a] = r[i]
+            recmap.append(tmpdict)
         
+        with self.driver.session() as session:
+            session.run(query_str, props=recmap)
+    
+    def random_date(self):
+        start = datetime.datetime.strptime('6/1/2020 12:00 AM', '%m/%d/%Y %I:%M %p')
+        end = datetime.datetime.now()
+        delta = end - start
+        int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
+        random_second = random.randrange(int_delta)
+        return start + datetime.timedelta(seconds=random_second)
+    
+    def init_keymap(self):
+        self.keymap["H_UserType"] = 0
+        self.keymap["H_User"] = 0
+        self.keymap["H_AssetType"] = 0
+        self.keymap["H_Asset"] = 0
+        self.keymap["H_WhoProfile"] = 0
+        self.keymap["H_WhatProfile"] = 0
+        self.keymap["H_HowProfile"] = 0
+        self.keymap["H_WhyProfile"] = 0
+        self.keymap["H_WhenProfile"] = 0
+        self.keymap["H_SourceType"] = 0
+        self.keymap["H_Source"] = 0
+        self.keymap["H_WhereProfile"] = 0
+        self.keymap["H_Action"] = 0
+        self.keymap["H_RelationshipType"] = 0
+        self.keymap["H_Relationship"] = 0
+        self.keymap["L_UserTypeLink"] = 0
+        self.keymap["L_AssetTypeLink"] = 0
+        self.keymap["L_Asset_WhoProfile"] = 0
+        self.keymap["L_WhoProfileUser"] = 0
+        self.keymap["L_Asset_HowProfile"] = 0
+        self.keymap["L_Asset_WhyProfile"] = 0
+        self.keymap["L_Asset_WhatProfile"] = 0
+        self.keymap["L_Asset_WhenProfile"] = 0
+        self.keymap["L_Source2Type"] = 0
+        self.keymap["L_Asset_WhereProfile"] = 0
+        self.keymap["L_AssetsInActions"] = 0
+        self.keymap["L_Relationship_Type"] = 0
+        self.keymap["L_Asset_Relationships"] = 0
+        self.keymap["S_User_schema"] = 0
+        self.keymap["S_WhoProfile_schema"] = 0
+        self.keymap["S_HowProfile_schema"] = 0
+        self.keymap["S_WhyProfile_schema"] = 0
+        self.keymap["S_WhatProfile_schema"] = 0
+        self.keymap["S_WhenProfile_Attributes"] = 0
+        self.keymap["S_Configuration"] = 0
+        self.keymap["S_SourceTypeAttributes"] = 0
+        self.keymap["S_AssetTypeAttributes"] = 0
+        self.keymap["S_UserTypeAttributes"] = 0
+        self.keymap["S_RelationshipTypeAttributes"] = 0
+        self.keymap["S_Relationship_schema"] = 0
+        self.keymap["S_Source_schema"] = 0
+        self.keymap["L_WhereProfile_Source"] = 0
+    
+    #there's pretty much no way to factor this nicely...
+    def load_usertype(self):
+        h_usertype_recs = []
+        s_usertype_recs = []
+        
+        h_chunksize = 0
+        s_chunksize = 0
+        h_chunknum = 0
+        s_chunknum = 0
+        h_user_query = self.make_query('H_UserType')
+        s_user_query = self.make_query('S_UserTypeAttributes')
+        with open('UserType.csv', 'r') as fh:
+            for i,row in enumerate(fh):
+                rowlen = len(row)
+                if rowlen == 0:
+                    continue
+                utype_id = row[0]
+                utype_name = row[1]
+                utype_desc = row[2]
+                timestamp = self.random_date()
+                user_id = 1
+                h_usertype_recs.append([utype_id, str(self.version),
+                                        timestamp, user_id])
+                s_usertype_recs.append([utype_id, utype_name, utype_desc,
+                                        str(self.version), timestamp,
+                                        user_id])
+                h_chunksize += 1
+                s_chunksize += 1
+                if h_chunksize >= 1000:
+                    h_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting h_Chunk Number: " + str(h_chunknum))
+                    self.insertToDB('H_UserType', h_user_query, h_usertype_recs)
+                    h_usertype_recs = []
+                    h_chunksize = 0
+                if s_chunksize >= 1000:
+                    s_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting s_Chunk Number: " + str(s_chunknum))
+                    self.insertToDB('S_UserTypeAttributes', s_user_query, s_usertype_recs)
+                    s_usertype_recs = []
+                    s_chunksize = 0
+            
+                #insert any leftovers:
+            if len(h_usertype_recs) > 0:
+                self.insertToDB('H_UserType', h_user_query, h_usertype_recs)
+            if len(s_usertype_recs) > 0:
+                self.insertToDB('S_UserTypeAttributes', s_user_query, s_usertype_recs)
+    
+    def load_assettype(self):
+        h_assettype_recs = []
+        s_assettype_recs = []
+        
+        h_chunksize = 0
+        s_chunksize = 0
+        h_chunknum = 0
+        s_chunknum = 0
+        h_a_query = self.make_query('H_AssetType')
+        s_a_query = self.make_query('S_AssetTypeAttributes')
+        with open('AssetType.csv', 'r') as fh:
+            for i,row in enumerate(fh):
+                atype_id = row[0]
+                atype_name = row[1]
+                atype_desc = row[2]
+                timestamp = self.random_date()
+                user_id = 1
+                h_assettype_recs.append([atype_id, str(self.version),
+                                         timestamp, user_id])
+                s_assettype_recs.append([atype_id, atype_name, atype_desc,
+                                         str(self.version), timestamp, user_id])
+                h_chunksize += 1
+                s_chunksize += 1
+                if h_chunksize >= 1000:
+                    h_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting h_Chunk Number: " + str(h_chunknum))
+                    self.insertToDB('H_AssetType', h_a_query, h_assettype_recs)
+                    h_assettype_recs = []
+                    h_chunksize = 0
+                if s_chunksize >= 1000:
+                    s_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting s_Chunk Number: " + str(s_chunknum))
+                    self.insertToDB('S_AssetTypeAttributes', s_a_query, s_assettype_recs)
+                    s_assettype_recs = []
+                    s_chunksize = 0
+            
+            #insert any leftovers:
+            if len(h_assettype_recs) > 0:
+                self.insertToDB('H_AssetType', h_a_query, h_assettype_recs)
+            if len(s_assettype_recs) > 0:
+                self.insertToDB('S_AssetTypeAttributes', s_a_query, s_assettype_recs)
+    
+    def load_reltype(self):
+        h_relationshiptype_recs = []
+        s_relationshiptype_recs = []
+        h_chunksize = 0
+        s_chunksize = 0
+        h_chunknum = 0
+        s_chunknum = 0
+        h_r_query = self.make_query('H_RelationshipType')
+        s_r_query = self.make_query('S_RelationshipTypeAttributes')
+        with open('RelationshipType.csv', 'r') as fh:
+            for i, row in enumerate(fh):
+                pid = row[0]
+                name = row[1]
+                desc = row[2]
+                timestamp = self.random_date()
+                user_id = 1
+                h_relationshiptype_recs.append([pid, self.version, timestamp, user_id])
+                s_relationshiptype_recs.append([pid, name, desc, self.version, timestamp, user_id])
+                h_chunksize += 1
+                s_chunksize += 1
+                if h_chunksize >= 1000:
+                    h_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting h_Chunk Number: " + str(h_chunknum))
+                    self.insertToDB('H_RelationshipType', h_r_query, h_relationshiptype_recs)
+                    h_relationshiptype_recs = []
+                    h_chunksize = 0
+                if s_chunksize >= 1000:
+                    s_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting s_Chunk Number: " + str(s_chunknum))
+                    self.insertToDB('S_RelationshipTypeAttributes', s_r_query, s_relationshiptype_recs)
+                    s_relationshiptype_recs = []
+                    s_chunksize = 0
+            
+            #insert any leftovers:
+            if len(h_relationshiptype_recs) > 0:
+                self.insertToDB('H_RelationshipType', h_r_query, h_relationshiptype_recs)
+            if len(s_relationshiptype_recs) > 0:
+                self.insertToDB('S_RelationshipTypeAttributes', s_r_query, s_relationshiptype_recs)
+        
+    
+    def load_sourcetype(self):
+        h_sourcetype_recs = []
+        s_sourcetype_recs = []
+        h_chunksize = 0
+        s_chunksize = 0
+        h_chunknum = 0
+        s_chunknum = 0
+        h_s_query = self.make_query('H_SourceType')
+        s_s_query = self.make_query('S_SourceTypeAttributes')
+        with open('SourceType.csv', 'r') as fh:
+            for i,row in enumerate(fh):
+                pid = row[0]
+                connector = row[1]
+                serde = row[2]
+                datamodel = row[3]
+                timestamp = self.random_date()
+                user_id = 1
+                h_sourcetype_recs.append([pid, self.version, timestamp, user_id])
+                s_sourcetype_recs.append([pid, pid, connector, serde, datamodel,
+                                         self.version, timestamp, user_id])
+                h_chunksize += 1
+                s_chunksize += 1
+                if h_chunksize >= 1000:
+                    h_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting h_Chunk Number: " + str(h_chunknum))
+                    self.insertToDB('H_SourceType', h_s_query, h_sourcetype_recs)
+                    h_sourcetype_recs = []
+                    h_chunksize = 0
+                if s_chunksize >= 1000:
+                    s_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting s_Chunk Number: " + str(s_chunknum))
+                    self.insertToDB('S_SourceTypeAttributes', s_s_query, s_sourcetype_recs)
+                    s_sourcetype_recs = []
+                    s_chunksize = 0
+            
+            #insert any leftovers:
+            if len(h_sourcetype_recs) > 0:
+                self.insertToDB('H_SourceType', h_s_query, h_sourcetype_recs)
+            if len(s_sourcetype_recs) > 0:
+                self.insertToDB('S_SourceTypeAttributes', s_s_query, s_sourcetype_recs)
+    
+    def load_users(self):
+        h_user_recs = []
+        s_user_recs = []
+        l_user_recs = []
+        
+        h_chunksize = 0
+        s_chunksize = 0
+        l_chunksize = 0
+        h_chunknum = 0
+        l_chunknum = 0
+        s_chunknum = 0
+        h_query = self.make_query('H_User')
+        s_query = self.make_query('S_User_schema')
+        l_query = self.make_query('L_UserTypeLink')
+        with open('User.csv', 'r') as fh:
+            for i,row in enumerate(fh):
+                pid = row[0]
+                name = row[1]
+                utype = row[2]
+                schema = row[3]
+                ver = row[4]
+                date = row[5]
+                user_id = row[6]
+                h_user_recs.append([pid, name, ver, date, user_id])
+                s_user_recs.append([pid, pid, schema, ver, date, user_id])
+                self.keymap['L_UserTypeLink'] += 1
+                l_user_recs.append([self.keymap['L_UserTypeLink'], pid, utype,
+                                   self.version, self.random_date(), user_id])
+                h_chunksize += 1
+                s_chunksize += 1
+                l_chunksize += 1
+                if h_chunksize >= 1000:
+                    h_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting h_Chunk Number: " + str(h_chunknum))
+                    self.insertToDB('H_User', h_query, h_user_recs)
+                    h_user_recs = []
+                    h_chunksize = 0
+                if s_chunksize >= 1000:
+                    s_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting s_Chunk Number: " + str(s_chunknum))
+                    self.insertToDB('S_User_schema', s_query, s_user_recs)
+                    s_user_recs = []
+                    s_chunksize = 0
+                if l_chunksize >= 1000:
+                    l_chunknum += 1
+                    print("Inserting through row: " + str(i))
+                    print("Inserting l_Chunk Number: " + str(l_chunknum))
+                    self.insertToDB('L_UserTypeLink', l_query, l_user_recs)
+                    l_user_recs = []
+                    l_chunksize = 0
+            
+            #insert any leftovers:
+            if len(h_user_recs) > 0:
+                self.insertToDB('H_User', h_query, h_user_recs)
+            if len(s_user_recs) > 0:
+                self.insertToDB('S_User_schema', s_query, s_user_recs)
+            if len(l_user_recs) > 0:
+                self.insertToDB('L_UserTypeLink', l_query, l_user_recs)
+    
+    def load_assets(self):
+        h_recs = []
+        l_recs = []
+        
+        h_chunksize = 0
+        l_chunksize = 0
+        h_chunknum = 0
+        l_chunknum = 0
+        h_query = self.make_query('h_asset')
+        l_query = self.make_query('l_assettypelink')
+        for i,row in enumerate(self.csv_map['Asset']):
+            pid = row[0]
+            name = row[1]
+            atype = row[2]
+            ver = row[3]
+            date = row[4]
+            user_id = row[5]
+            h_recs.append([pid, name, ver, date, user_id])
+            self.keymap['L_AssetTypeLink'] += 1
+            l_recs.append([self.keymap['L_AssetTypeLink'],
+                          pid, atype, self.version, self.random_date(), user_id])
+            h_chunksize += 1
+            l_chunksize += 1
+            if h_chunksize >= 1000:
+                h_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting h_Chunk Number: " + str(h_chunknum))
+                self.insertToDB(self.con, h_query, h_recs)
+                h_recs = []
+                h_chunksize = 0
+            if l_chunksize >= 1000:
+                l_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting l_Chunk Number: " + str(l_chunknum))
+                self.insertToDB(self.con, l_query, l_recs)
+                l_recs = []
+                l_chunksize = 0
+        
+        #insert any leftovers:
+        if len(h_recs) > 0:
+            self.insertToDB(self.con, h_query, h_recs)
+        if len(l_recs) > 0:
+            self.insertToDB(self.con, l_query, l_recs)
 

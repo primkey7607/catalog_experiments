@@ -92,6 +92,15 @@ class GenNNeo4j:
             print("Now Loading: " + tname)
             self.load_table(tname)
     
+    def create_all_indexes(self):
+        #CREATE CONSTRAINT ON (p:Person)
+        #ASSERT p.id IS UNIQUE
+        for tname in self.tableLst:
+            query_str = "CREATE CONSTRAINT ON (p:" + tname + ") "
+            query_str += "ASSERT p.id IS UNIQUE"
+            with self.driver.session() as session:
+                session.run(query_str)
+    
     def create_relquery(self, t1, t2, k1, k2):
         #sample: MATCH (a:Person),(b:Person)
         #WHERE a.name = 'A' AND b.name = 'B'
@@ -380,6 +389,7 @@ if __name__ == "__main__":
     graph_loader = GenNNeo4j("bolt://localhost:7687", "neo4j", "normal")
     #graph_loader.load_one("HowProfile")
     graph_loader.load_all_tables()
+    graph_loader.create_all_indexes()
     graph_loader.load_all_relationships()
     graph_loader.close() 
 
