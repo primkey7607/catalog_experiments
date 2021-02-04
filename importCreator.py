@@ -118,7 +118,7 @@ class NormImportCreator:
                                     'Action', 'RelationshipType', 'Relationship',
                                     'Asset_Relationships']
         
-        res_str = 'bin/neo4j-admin import --database=normalizedv8 --skip-duplicate-nodes --skip-bad-relationships '
+        res_str = 'bin/neo4j-admin import --database=normalizedv9 --skip-duplicate-nodes --skip-bad-relationships '
         res_str += '--id-type=INTEGER '
         for tname in table_order:
             res_str += '--nodes=' + tname + '=import/' + tname + '-header.csv,'
@@ -186,10 +186,10 @@ if __name__ == "__main__":
     nic = NormImportCreator()
     #nic.create_headers()
     #nic.create_relheaders()
-    #nic.create_bulk_command()
+    nic.create_bulk_command()
     #nic.create_valid_dates('baddates/WhatProfile.csv', 'WhatProfile.csv', 'WhatProfile')
     #nic.create_valid_dates('baddates/User.csv', 'User.csv', 'User')
-    nic.create_all_valid_dates()
+    #nic.create_all_valid_dates()
                     
             
         
