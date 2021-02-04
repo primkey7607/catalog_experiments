@@ -176,7 +176,7 @@ class NNeo4j_Queries:
         # query_str += str(profid + 1) + ', ' + str(version) + ', ' + '\"' + str(datetime.datetime.now()) + '\"' + ', '
         # query_str += str(uid) + ', ' + str(asset_id) + ', ' + str(schema) + ');'
         query_str = 'MERGE (n:HowProfile { id: ' + str(profid + 1)
-        query_str += ' version: ' + str(version) + 'timestamp: $nd'
+        query_str += ' version: ' + str(version) + ' timestamp: $nd'
         query_str += ' user_id: ' + str(uid) + ' asset_id: ' + str(asset_id)
         query_str += ' schema: ' + str(schema) + '})'
         
