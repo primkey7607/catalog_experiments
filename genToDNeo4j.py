@@ -451,8 +451,8 @@ class GenNNeo4j:
         l_chunksize = 0
         h_chunknum = 0
         l_chunknum = 0
-        h_query = self.make_query('h_asset')
-        l_query = self.make_query('l_assettypelink')
+        h_query = self.make_query('H_Asset')
+        l_query = self.make_query('L_AssetTypeLink')
         for i,row in enumerate(self.csv_map['Asset']):
             pid = row[0]
             name = row[1]
@@ -486,4 +486,80 @@ class GenNNeo4j:
             self.insertToDB(self.con, h_query, h_recs)
         if len(l_recs) > 0:
             self.insertToDB(self.con, l_query, l_recs)
+    
+    def load_whoprofile(self):
+        h_who = []
+        s_who = []
+        l_who = []
+        l_user = []
+        h_chunksize = 0
+        s_chunksize = 0
+        la_chunksize = 0
+        lu_chunksize = 0
+        h_chunknum = 0
+        la_chunknum = 0
+        lu_chunknum = 0
+        s_chunknum = 0
+        h_who_query = self.make_query('h_whoprofile')
+        s_who_query = self.make_query('s_whoprofile_schema')
+        l_awho_query = self.make_query('l_asset_whoprofile')
+        l_uwho_query = self.make_query('l_whoprofileuser')
+        for i,row in enumerate(self.csv_map['WhoProfile']):
+            pid = row[0]
+            ver = row[1]
+            date = row[2]
+            write_user = row[3]
+            asset_id = row[4]
+            uid = row[5]
+            schema = row[6]
+            h_who.append([pid, ver, date, write_user])
+            s_who.append([pid, pid, schema, uid, ver, date, write_user])
+            self.keymap['L_Asset_WhoProfile'] += 1
+            l_who.append([self.keymap['L_Asset_WhoProfile'], asset_id, pid,
+                          ver, date, write_user])
+            self.keymap['L_WhoProfileUser'] += 1
+            l_user.append([self.keymap['L_WhoProfileUser'],
+                           pid, uid, ver, date, write_user])
+            h_chunksize += 1
+            s_chunksize += 1
+            la_chunksize += 1
+            lu_chunksize += 1
+            if h_chunksize >= 1000:
+                h_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting h_Chunk Number: " + str(h_chunknum))
+                self.insertToDB(self.con, h_who_query, h_who)
+                h_who = []
+                h_chunksize = 0
+            if s_chunksize >= 1000:
+                s_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting s_Chunk Number: " + str(s_chunknum))
+                self.insertToDB(self.con, s_who_query, s_who)
+                s_who = []
+                s_chunksize = 0
+            if la_chunksize >= 1000:
+                la_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting l_Chunk Number: " + str(la_chunknum))
+                self.insertToDB(self.con, l_awho_query, l_who)
+                l_who = []
+                la_chunksize = 0
+            if lu_chunksize >= 1000:
+                lu_chunknum += 1
+                print("Inserting through row: " + str(i))
+                print("Inserting l_Chunk Number: " + str(lu_chunknum))
+                self.insertToDB(self.con, l_uwho_query, l_user)
+                l_user = []
+                lu_chunksize = 0
+        
+        #insert any leftovers:
+        if len(h_who) > 0:
+            self.insertToDB(self.con, h_who_query, h_who)
+        if len(s_who) > 0:
+            self.insertToDB(self.con, s_who_query, s_who)
+        if len(l_who) > 0:
+            self.insertToDB(self.con, l_awho_query, l_who)
+        if len(l_user) > 0:
+            self.insertToDB(self.con, l_uwho_query, l_user)
 
