@@ -180,12 +180,12 @@ class NNeo4j_Queries:
         
         # query_str += str(profid + 1) + ', ' + str(version) + ', ' + '\"' + str(datetime.datetime.now()) + '\"' + ', '
         # query_str += str(uid) + ', ' + str(asset_id) + ', ' + str(schema) + ');'
-        query_str = 'CALL {MERGE (n:HowProfile { id: ' + str(profid + 1) + ','
+        query_str = 'WITH MERGE (n:HowProfile { id: ' + str(profid + 1) + ','
         query_str += ' version: ' + str(version) + ',' + ' timestamp: $nd ,'
         query_str += ' user_id: ' + str(uid) + ', asset_id: ' + str(asset_id)
-        query_str += ', schema: ' + str(schema) + '}) RETURN n} '
-        query_str += 'MATCH (u:User) WHERE u.id = n.user_id MERGE (n)-[:Rel_HowProfile_User]->(u) '
-        query_str += ' MATCH (a:Asset) WHERE a.id = n.asset_id MERGE (n)-[:Rel_HowProfile_Asset]->(a)'
+        query_str += ', schema: ' + str(schema) + '}) RETURN n AS n2 '
+        query_str += 'MATCH (u:User) WHERE u.id = n2.user_id MERGE (n2)-[:Rel_HowProfile_User]->(u) '
+        query_str += ' MATCH (a:Asset) WHERE a.id = n2.asset_id MERGE (n2)-[:Rel_HowProfile_Asset]->(a)'
         
         
         # print("Executing Query 2: " + query_str)
