@@ -57,7 +57,17 @@ class NormImportCreator:
         self.fkmap['Action'] = [('user_id', 'User'), ('asset_id', 'Asset'),
                                 ('who_id', 'WhoProfile'), ('how_id', 'HowProfile'),
                                 ('why_id', 'WhyProfile'), ('when_id', 'WhenProfile')]
-        
+    
+    def getDataType(self, attrName):
+        if 'id' in attrName:
+            return 'int'
+        elif attrName == 'version':
+            return 'int'
+        elif 'timestamp' in attrName or 'date' in attrName:
+            return 'datetime'
+        else:
+            return 'string'
+    
     def create_headers(self):
         for key in self.attrmap:
             attrs = self.attrmap[key]
@@ -66,7 +76,13 @@ class NormImportCreator:
                 if a == 'id':
                     schema_str.append(a + ':ID(' + key + '-ID)')
                 else:
-                    schema_str.append(a)
+                    dtype = self.getDataType(a)
+                    if dtype == 'int':
+                        schema_str.append(a + ':int')
+                    elif dtype == 'datetime':
+                        schema_str.append(a + ':datetime')
+                    else:
+                        schema_str.append(a)
             
             with open(key + '-header.csv', 'w+') as fh:
                 csvwriter = csv.writer(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -90,6 +106,9 @@ class NormImportCreator:
                 with open('Rel_' + key + '_' + fk_name + '-header.csv', 'w+') as fh:
                     csvwriter = csv.writer(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     csvwriter.writerow(schema_str)
+                    
+    
+    
     
     def create_bulk_command(self):
         table_order = ['UserType', 'User', 'AssetType',
@@ -100,7 +119,7 @@ class NormImportCreator:
                                     'Asset_Relationships']
         
         res_str = 'bin/neo4j-admin import --database=normalizedv6 --skip-duplicate-nodes --skip-bad-relationships '
-        
+        res_str += '--id-type=INTEGER '
         for tname in table_order:
             res_str += '--nodes=' + tname + '=import/' + tname + '-header.csv,'
             res_str += 'import/' + tname + '.csv '
@@ -122,8 +141,8 @@ class NormImportCreator:
 
 if __name__ == "__main__":
     nic = NormImportCreator()
-    #nic.create_headers()
-    #nic.create_relheaders()
+    nic.create_headers()
+    nic.create_relheaders()
     nic.create_bulk_command()
                     
             
