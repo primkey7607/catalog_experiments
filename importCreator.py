@@ -118,7 +118,7 @@ class NormImportCreator:
                                     'Action', 'RelationshipType', 'Relationship',
                                     'Asset_Relationships']
         
-        res_str = 'bin/neo4j-admin import --database=normalizedv6 --skip-duplicate-nodes --skip-bad-relationships '
+        res_str = 'bin/neo4j-admin import --database=normalizedv8 --skip-duplicate-nodes --skip-bad-relationships '
         res_str += '--id-type=INTEGER '
         for tname in table_order:
             res_str += '--nodes=' + tname + '=import/' + tname + '-header.csv,'
