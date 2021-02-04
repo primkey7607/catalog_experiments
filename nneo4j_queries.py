@@ -183,20 +183,22 @@ class NNeo4j_Queries:
         query_str = 'MERGE (n:HowProfile { id: ' + str(profid + 1) + ','
         query_str += ' version: ' + str(version) + ',' + ' timestamp: $nd ,'
         query_str += ' user_id: ' + str(uid) + ', asset_id: ' + str(asset_id)
-        query_str += ', schema: ' + str(schema) + '})'
+        query_str += ', schema: ' + str(schema) + '}) '
+        query_str += 'MATCH (u:User) WHERE u.id = n.user_id MERGE (n)-[:Rel_HowProfile_User]->(u)'
+        query_str += ' MATCH (a:Asset) WHERE a.id = n.asset_id MERGE (n)-[:Rel_HowProfile_Asset]->(a)'
         
         
-        print("Executing Query 2: " + query_str)
-        rel_query1 = self.create_q2_relquery('HowProfile', 'User', 'user_id', 'id', uid)
-        rel_query2 = self.create_q2_relquery('HowProfile', 'Asset', 'asset_id', 'id', asset_id)
-        print("Executing Query 2 Relationships: " + rel_query1)
-        print(rel_query2)
+        # print("Executing Query 2: " + query_str)
+        # rel_query1 = self.create_q2_relquery('HowProfile', 'User', 'user_id', 'id', uid)
+        # rel_query2 = self.create_q2_relquery('HowProfile', 'Asset', 'asset_id', 'id', asset_id)
+        # print("Executing Query 2 Relationships: " + rel_query1)
+        # print(rel_query2)
         pr = cProfile.Profile()
         pr.enable()
         with self.driver.session() as session:
             session.run(query_str, nd=nd)
-            session.run(rel_query1)
-            session.run(rel_query2)
+            # session.run(rel_query1)
+            # session.run(rel_query2)
         pr.disable()
         s = io.StringIO()
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
