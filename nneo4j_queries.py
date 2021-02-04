@@ -116,15 +116,11 @@ class NNeo4j_Queries:
             recmap.append(tmpdict)
         
         print("Executing query " + str(qnum) + ": " + query_str)
-        for r in rel_queries:
-            print("Executing relationship queries: " + r)
         
         pr = cProfile.Profile()
         pr.enable()
         with self.driver.session() as session:
             session.run(query_str, props=recmap)
-            for r in rel_queries:
-                session.run(r)
         pr.disable()
         s = io.StringIO()
         ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
