@@ -57,7 +57,13 @@ class NNeo4j_Queries:
             return 'string'
     
     def make_q1_query(self, tname):
-        query_str = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        query_str1 += " RETURN n"
+        query_str2 = "MATCH (m:User) WHERE m.id = n.user_id CREATE (n)-[:Rel_WhatProfile_User]->(m)"
+        
+        query_str = 'call apoc.periodic.iterate("' + query_str1 + '", '
+        query_str += '"' + query_str2 + '", {batchSize:1000}) YIELD batches, total, errorMessages return batches, total, errorMessages'
+        
         return query_str
     
     def get_lastId(self, tname):
@@ -73,7 +79,8 @@ class NNeo4j_Queries:
         #RETURN type(r)
         #query_str = 'call apoc.periodic.iterate("match(u:' + t1 + ') with u return u", "match (b:' + t2 + ') where u.' + k1 + ' = b.' + k2 + ' create (u)-[r:RELTYPE]->(b)", {batchSize:1000}) YIELD batches, total, errorMessages return batches, total, errorMessages'
         query_str = "MATCH (a:" + t1 + ") MATCH (b:" + t2 + ") "
-        query_str += "WHERE a." + k1 + " = b." + k2
+        #we no longer need this
+        #query_str += "WHERE a." + k1 + " = b." + k2
         rel_name = 'Rel_' + t1 + '_' + t2
         query_str += " MERGE (a)-[r:" + rel_name + "]->(b);"
         return query_str
