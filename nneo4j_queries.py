@@ -180,10 +180,10 @@ class NNeo4j_Queries:
         
         # query_str += str(profid + 1) + ', ' + str(version) + ', ' + '\"' + str(datetime.datetime.now()) + '\"' + ', '
         # query_str += str(uid) + ', ' + str(asset_id) + ', ' + str(schema) + ');'
-        query_str = 'MERGE (n:HowProfile { id: ' + str(profid + 1)
-        query_str += ' version: ' + str(version) + ' timestamp: $nd'
-        query_str += ' user_id: ' + str(uid) + ' asset_id: ' + str(asset_id)
-        query_str += ' schema: ' + str(schema) + '})'
+        query_str = 'MERGE (n:HowProfile { id: ' + str(profid + 1) + ','
+        query_str += ' version: ' + str(version) + ',' + ' timestamp: $nd ,'
+        query_str += ' user_id: ' + str(uid) + ', asset_id: ' + str(asset_id)
+        query_str += ', schema: ' + str(schema) + '})'
         
         
         print("Executing Query 2: " + query_str)
@@ -437,7 +437,8 @@ class NNeo4j_Queries:
             f.write(s.getvalue())
     
     def execute_full(self):
-        self.execute_q1()
+        #q1 is complete
+        #self.execute_q1()
         self.execute_q2()
         self.execute_q3(100000)
         #repeat the other experiments 5 times
