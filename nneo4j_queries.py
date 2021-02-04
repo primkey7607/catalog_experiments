@@ -96,11 +96,12 @@ class NNeo4j_Queries:
         for r in recs:
             tmpdict = {}
             for i,a in enumerate(attrs):
-                dtype = self.getDataType(a)
+                dtype = self.getDataType(str(a))
                 if dtype == 'int':
                     tmpdict[a] = int(r[i])
                 elif dtype == 'datetime':
-                    dt = datetime.datetime.strptime(r[i], '%Y-%m-%d %H:%M:%S')
+                    #dt = datetime.datetime.strptime(r[i], '%Y-%m-%d %H:%M:%S')
+                    dt = r[i]
                     nd = DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, float(dt.second))
                     tmpdict[a] = nd
                 else:
@@ -147,7 +148,8 @@ class NNeo4j_Queries:
                     elif i == 1:
                         newrow.append(str(int(c) + 1))
                     elif i == 2:
-                        newrow.append(str(datetime.datetime.now()))
+                        #newrow.append(str(datetime.datetime.now()))
+                        newrow.append(datetime.datetime.now())
                     else:
                         newrow.append(c)
                     
