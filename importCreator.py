@@ -136,14 +136,60 @@ class NormImportCreator:
             fh.write('#! /bin/sh\n')
             fh.write('BASEDIR=$(pwd)\n\n')
             fh.write(res_str)
-            
+    
+    def create_valid_dates(self, oldname, fname, tname):
+        with open(oldname, 'r') as fh:
+            csvreader = csv.reader(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            with open(fname, 'w+') as fh2:
+                csvwriter = csv.writer(fh2, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                numrows = 0
+                batch = []
+                for i,row in enumerate(csvreader):
+                    newrow = []
+                    for j,e in enumerate(row):
+                        dt = self.getDataType(self.attrmap[tname][j])
+                        if dt == 'datetime':
+                            dsplit = e.split(' ')
+                            valid = 'T'.join(dsplit)
+                            newrow.append(valid)
+                        else:
+                            newrow.append(e)
+                    batch.append(newrow)
+                    numrows += 1
+                    if numrows >= 10000:
+                        csvwriter.writerows(batch)
+                        batch = []
+                        numrows = 0
+                
+                if len(batch) > 0:
+                    csvwriter.writerows(batch)
+                    batch = []
+    
+    def create_all_valid_dates(self):
+        #NOTE: we left User and WhatProfile off here
+        #because we already have these files
+        table_order = ['UserType', 'AssetType',
+                       'Asset', 'WhoProfile',
+                       'HowProfile','WhyProfile', 'WhenProfile',
+                       'SourceType', 'Source', 'WhereProfile', 
+                       'Action', 'RelationshipType', 'Relationship',
+                       'Asset_Relationships']
+        
+        for tname in table_order:
+            print("Creating New Table for: " + tname)
+            self.create_valid_dates('baddates/' + tname + '.csv', tname + '.csv', tname)
+                    
+                            
                 
 
 if __name__ == "__main__":
     nic = NormImportCreator()
-    nic.create_headers()
-    nic.create_relheaders()
-    nic.create_bulk_command()
+    #nic.create_headers()
+    #nic.create_relheaders()
+    #nic.create_bulk_command()
+    #nic.create_valid_dates('baddates/WhatProfile.csv', 'WhatProfile.csv', 'WhatProfile')
+    #nic.create_valid_dates('baddates/User.csv', 'User.csv', 'User')
+    nic.create_all_valid_dates()
                     
             
         
