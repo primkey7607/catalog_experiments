@@ -450,7 +450,7 @@ class NNeo4j_Queries:
         self.driver.close()
 
 if __name__ == "__main__":
-    neo_queries = NNeo4j_Queries()
+    neo_queries = NNeo4j_Queries("bolt://localhost:7687", "neo4j", "normal")
     neo_queries.execute_full()
 
 
