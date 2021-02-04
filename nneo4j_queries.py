@@ -449,4 +449,8 @@ class NNeo4j_Queries:
     def close(self):
         self.driver.close()
 
+if __name__ == "__main__":
+    neo_queries = NNeo4j_Queries()
+    neo_queries.execute_full()
+
 
