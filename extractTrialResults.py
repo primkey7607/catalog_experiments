@@ -6,11 +6,11 @@ trial_nums = range(6)
 
 def check_line_for_time(line):
     #sample line- 2 function calls in 0.000 seconds
-    pattern = re.compile(r'(.*) function calls in (.*) seconds')
+    pattern = re.compile(r'(.*) function calls (.*) in (.*) seconds')
     searched = pattern.search(line)
     if searched:
-        print(searched.group(2).strip())
-        runtime = float(searched.group(2).strip())
+        print(searched.group(3).strip())
+        runtime = float(searched.group(3).strip())
         return runtime
     else:
         return None
@@ -54,4 +54,5 @@ def extract_times_to_csv(dirname):
         resfile.write(toWrite)
     resfile.close()
     
-extract_times_to_csv('/home/pranav/catalog_experiments/dsqlres')
+#extract_times_to_csv('/home/pranav/catalog_experiments/dsqlres')
+extract_times_to_csv('/home/pranav/catalog_experiments/nneo4jres')

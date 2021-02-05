@@ -96,6 +96,9 @@ class GenNNeo4j:
         #CREATE CONSTRAINT ON (p:Person)
         #ASSERT p.id IS UNIQUE
         for tname in self.tableLst:
+            #we already created uniqueness constraints for these
+            if tname == 'WhatProfile' or tname == 'User' or tname == 'Asset':
+                continue
             query_str = "CREATE CONSTRAINT ON (p:" + tname + ") "
             query_str += "ASSERT p.id IS UNIQUE"
             with self.driver.session() as session:
@@ -388,8 +391,8 @@ class GenNNeo4j:
 if __name__ == "__main__":
     graph_loader = GenNNeo4j("bolt://localhost:7687", "neo4j", "normal")
     #graph_loader.load_one("HowProfile")
-    graph_loader.load_all_tables()
+    #graph_loader.load_all_tables()
     graph_loader.create_all_indexes()
-    graph_loader.load_all_relationships()
+    #graph_loader.load_all_relationships()
     graph_loader.close() 
 

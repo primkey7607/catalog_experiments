@@ -14,6 +14,8 @@ class NNeo4j_Queries:
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         self.attrmap = {}
         self.init_attrmap()
+        self.fkmap = {}
+        self.init_fkmap()
     
     def init_attrmap(self):
         self.attrmap['UserType'] = ['id', 'name', 'description']
@@ -56,6 +58,26 @@ class NNeo4j_Queries:
         else:
             return 'string'
     
+    #keys: table names
+    #values: FKs of the table
+    def init_fkmap(self):
+        self.fkmap['User'] = [('user_type_id', 'UserType'), ('user_id', 'User')]
+        self.fkmap['Asset'] = [('asset_type_id', 'AssetType'), ('user_id', 'User')]
+        self.fkmap['WhoProfile'] = [('write_user_id', 'User'), ('asset_id', 'Asset'),
+                                    ('user_id', 'User')]
+        self.fkmap['WhatProfile'] = [('asset_id', 'Asset'), ('user_id', 'User')]
+        self.fkmap['HowProfile'] = [('asset_id', 'Asset'), ('user_id', 'User')]
+        self.fkmap['WhyProfile'] = [('asset_id', 'Asset'), ('user_id', 'User')]
+        self.fkmap['WhenProfile'] = [('asset_id', 'Asset'), ('user_id', 'User')]
+        self.fkmap['Source'] = [('user_id', 'User'), ('source_type_id', 'SourceType')]
+        self.fkmap['WhereProfile'] = [('asset_id', 'Asset'), ('user_id', 'User'),
+                                      ('source_id', 'Source')]
+        self.fkmap['Relationship'] = [('user_id', 'User'), ('relationship_type_id', 'RelationshipType')]
+        self.fkmap['Asset_Relationships'] = [('asset_id', 'Asset'), ('relationship_id', 'Relationship')]
+        self.fkmap['Action'] = [('user_id', 'User'), ('asset_id', 'Asset'),
+                                ('who_id', 'WhoProfile'), ('how_id', 'HowProfile'),
+                                ('why_id', 'WhyProfile'), ('when_id', 'WhenProfile')]
+    
     def make_q1_query(self, tname):
         query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
         query_str1 += " RETURN n"
@@ -66,11 +88,40 @@ class NNeo4j_Queries:
         
         return query_str
     
+    def make_bulk_query(self, tname):
+        query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        query_str1 += " RETURN n"
+        #query_str2 = "MATCH (m:User) WHERE m.id = n.user_id "
+        #query_str2 += "CREATE (n)-[:Rel_WhatProfile_User]->(m)"
+        
+        node_part = ""
+        rel_part = ""
+        for p in self.fkmap[tname]:
+            fk = p[0]
+            fk_name = p[1]
+            var_name = fk_name.lower()
+            node_part += "MATCH (" + var_name + ":" + fk_name + ") WHERE "
+            node_part += var_name + ".id = n." + fk + " "
+            rel_part += "CREATE (n)-[:Rel_" + tname + "_" + fk_name + "]->("
+            rel_part += var_name + ") "
+        
+        query_str2 = node_part + rel_part
+        
+        query_str = 'call apoc.periodic.iterate("' + query_str1 + '", '
+        query_str += '"' + query_str2 + '", {batchSize:1000, params: {props: $props}}) YIELD batches, total, errorMessages return batches, total, errorMessages'
+    
+        print("Going to Execute: " + query_str)
+        return query_str
+    
     def get_lastId(self, tname):
-        query_str = "MATCH (n:" + tname + ") RETURN max(n.id);"
+        query_str = "MATCH (n:" + tname + ") RETURN max(n.id) AS max_id;"
+        print(query_str)
         with self.driver.session() as session:
             result = session.run(query_str)
-            return result.single()[0]
+            record = result.single()
+            print(tname + ": " + str(record))
+            print("Max of " + tname + " is: " + str(record["max_id"]))
+            return record["max_id"]
     
     def create_relquery(self, t1, t2, k1, k2):
         #sample: MATCH (a:Person),(b:Person)
@@ -171,7 +222,7 @@ class NNeo4j_Queries:
     def execute_q2(self):
         asset_id = self.get_lastId('Asset')
         profid = self.get_lastId('HowProfile')
-        schema = '\"{ denoisingProcedure : run denoise.py with normalize set to true }\" '
+        schema = '\'{ denoisingProcedure : run denoise.py with normalize set to true }\' '
         version = 1
         uid = 1
         dt = datetime.datetime.now()
@@ -183,12 +234,12 @@ class NNeo4j_Queries:
         query_str1 = 'MERGE (n:HowProfile { id: ' + str(profid + 1) + ','
         query_str1 += ' version: ' + str(version) + ',' + ' timestamp: $nd ,'
         query_str1 += ' user_id: ' + str(uid) + ', asset_id: ' + str(asset_id)
-        query_str1 += ', schema: ' + str(schema) + '}) RETURN n'
+        query_str1 += ', schema: ' + str(schema) + ' }) RETURN n'
         query_str2 = 'MATCH (u:User) WHERE u.id = n.user_id MATCH (a:Asset) WHERE a.id = n.asset_id MERGE (n)-[:Rel_HowProfile_User]->(u) '
         query_str2 += ' MERGE (n)-[:Rel_HowProfile_Asset]->(a)'
         
         query_str = 'call apoc.periodic.iterate("' + query_str1 + '", '
-        query_str += '"' + query_str2 + '") YIELD batches, total, errorMessages return batches, total, errorMessages'
+        query_str += '"' + query_str2 + '", {}) YIELD batches, total, errorMessages return batches, total, errorMessages'
         
         # print("Executing Query 2: " + query_str)
         # rel_query1 = self.create_q2_relquery('HowProfile', 'User', 'user_id', 'id', uid)
@@ -261,6 +312,10 @@ class NNeo4j_Queries:
         
         who_inserts = self.get_q3inserts(who_name, who_id, common_asset, 3, x)
         how_inserts = self.get_q3inserts(how_name, how_id, common_asset, 3, x)
+        min_how_id = min([how_inserts[i]['id'] for i in range(x)])
+        print("Min_how_id: " + str(min_how_id))
+        min_who_id = min([who_inserts[i]['id'] for i in range(x)])
+        print("Min_who_id: " + str(min_who_id))
         why_inserts = self.get_q3inserts(why_name, why_id, common_asset, 3, x)
         when_inserts = self.get_q3inserts(when_name, when_id, common_asset, 3, x)
         
@@ -268,7 +323,7 @@ class NNeo4j_Queries:
         with open('Asset.csv', 'r') as fh:
             csvreader = csv.reader(fh, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             firstrow = []
-            for i,row in csvreader:
+            for i,row in enumerate(csvreader):
                 if i > 0:
                     break
                 else:
@@ -292,23 +347,28 @@ class NNeo4j_Queries:
         with self.driver.session() as session:
             session.run(asset_query, dct=adict)
         
-        who_query = self.make_q1_query(who_name)
-        who_relquery1 = self.create_relquery('WhoProfile', 'User', 'write_user_id', 'id')
-        who_relquery2 = self.create_relquery('WhoProfile', 'User', 'user_id', 'id')
-        who_relquery3 = self.create_relquery('WhoProfile', 'Asset', 'asset_id', 'id')
-        how_query = self.make_q1_query(how_name)
-        how_relquery1 = self.create_relquery('HowProfile', 'User', 'user_id', 'id')
-        how_relquery2 = self.create_relquery('HowProfile', 'Asset', 'asset_id', 'id')
-        why_query = self.make_q1_query(why_name)
-        why_relquery1 = self.create_relquery('WhyProfile', 'User', 'user_id', 'id')
-        why_relquery2 = self.create_relquery('WhyProfile', 'Asset', 'asset_id', 'id')
-        when_query = self.make_q1_query(when_name)
-        when_relquery1 = self.create_relquery('WhenProfile', 'User', 'user_id', 'id')
-        when_relquery2 = self.create_relquery('WhenProfile', 'Asset', 'asset_id', 'id')
+        # who_query = self.make_q1_query(who_name)
+        # who_relquery1 = self.create_relquery('WhoProfile', 'User', 'write_user_id', 'id')
+        # who_relquery2 = self.create_relquery('WhoProfile', 'User', 'user_id', 'id')
+        # who_relquery3 = self.create_relquery('WhoProfile', 'Asset', 'asset_id', 'id')
+        # how_query = self.make_q1_query(how_name)
+        # how_relquery1 = self.create_relquery('HowProfile', 'User', 'user_id', 'id')
+        # how_relquery2 = self.create_relquery('HowProfile', 'Asset', 'asset_id', 'id')
+        # why_query = self.make_q1_query(why_name)
+        # why_relquery1 = self.create_relquery('WhyProfile', 'User', 'user_id', 'id')
+        # why_relquery2 = self.create_relquery('WhyProfile', 'Asset', 'asset_id', 'id')
+        # when_query = self.make_q1_query(when_name)
+        # when_relquery1 = self.create_relquery('WhenProfile', 'User', 'user_id', 'id')
+        # when_relquery2 = self.create_relquery('WhenProfile', 'Asset', 'asset_id', 'id')
+        who_query = self.make_bulk_query(who_name)
+        how_query = self.make_bulk_query(how_name)
+        why_query = self.make_bulk_query(why_name)
+        when_query = self.make_bulk_query(when_name)
+        
         
         #create the action inserts and queries now
         action_inserts = []
-        action_query = self.make_q1_query('Action')
+        action_query = self.make_bulk_query('Action')
         for i in range(x):
             #['id', 'version', 'timestamp', 'user_id',
             #'asset_id', 'who_id', 'how_id', 'why_id',
@@ -327,38 +387,38 @@ class NNeo4j_Queries:
             actdict['when_id'] = when_inserts[i]['id']
             action_inserts.append(actdict)
         
-        action_relquery1 = self.create_relquery('Action', 'User', 'user_id', 'id')
-        action_relquery2 = self.create_relquery('Action', 'Asset', 'asset_id', 'id')
-        action_relquery3 = self.create_relquery('Action', 'WhoProfile', 'who_id', 'id')
-        action_relquery4 = self.create_relquery('Action', 'WhoProfile', 'who_id', 'id')
-        action_relquery5 = self.create_relquery('Action', 'HowProfile', 'how_id', 'id')
-        action_relquery6 = self.create_relquery('Action', 'WhyProfile', 'why_id', 'id')
-        action_relquery7 = self.create_relquery('Action', 'WhenProfile', 'when_id', 'id')
+        # action_relquery1 = self.create_relquery('Action', 'User', 'user_id', 'id')
+        # action_relquery2 = self.create_relquery('Action', 'Asset', 'asset_id', 'id')
+        # action_relquery3 = self.create_relquery('Action', 'WhoProfile', 'who_id', 'id')
+        # action_relquery4 = self.create_relquery('Action', 'WhoProfile', 'who_id', 'id')
+        # action_relquery5 = self.create_relquery('Action', 'HowProfile', 'how_id', 'id')
+        # action_relquery6 = self.create_relquery('Action', 'WhyProfile', 'why_id', 'id')
+        # action_relquery7 = self.create_relquery('Action', 'WhenProfile', 'when_id', 'id')
         
         pr = cProfile.Profile()
         pr.enable()
         with self.driver.session() as session:
             session.run(who_query, props=who_inserts)
-            session.run(who_relquery1)
-            session.run(who_relquery2)
-            session.run(who_relquery3)
+            # session.run(who_relquery1)
+            # session.run(who_relquery2)
+            # session.run(who_relquery3)
             session.run(how_query, props=how_inserts)
-            session.run(how_relquery1)
-            session.run(how_relquery2)
+            # session.run(how_relquery1)
+            # session.run(how_relquery2)
             session.run(why_query, props=why_inserts)
-            session.run(why_relquery1)
-            session.run(why_relquery2)
+            # session.run(why_relquery1)
+            # session.run(why_relquery2)
             session.run(when_query, props=when_inserts)
-            session.run(when_relquery1)
-            session.run(when_relquery2)
+            # session.run(when_relquery1)
+            # session.run(when_relquery2)
             session.run(action_query, props=action_inserts)
-            session.run(action_relquery1)
-            session.run(action_relquery2)
-            session.run(action_relquery3)
-            session.run(action_relquery4)
-            session.run(action_relquery5)
-            session.run(action_relquery6)
-            session.run(action_relquery7)
+            # session.run(action_relquery1)
+            # session.run(action_relquery2)
+            # session.run(action_relquery3)
+            # session.run(action_relquery4)
+            # session.run(action_relquery5)
+            # session.run(action_relquery6)
+            # session.run(action_relquery7)
         
         pr.disable()
         s = io.StringIO()
@@ -369,9 +429,9 @@ class NNeo4j_Queries:
             f.write(s.getvalue())
     
     def execute_q4(self, trial):
-        query_str = 'WITH datetime({year: 2020, month: 12, day: 20}).epochMillis AS d1 '
-        query_str = 'WITH datetime({year: 2020, month: 11, day: 01}).epochMillis as d2 '
-        query_str += 'MATCH (n:WhatProfile) WHERE n.timestamp >= d1 AND n.timestamp <= d2;'
+        #query_str = 'WITH datetime({year: 2020, month: 12, day: 20}).epochMillis AS d1 '
+        #query_str += 'WITH datetime({year: 2020, month: 11, day: 01}).epochMillis as d2 '
+        query_str = 'MATCH (n:WhatProfile) WHERE n.timestamp >= datetime({year: 2020, month: 12, day: 20}).epochMillis AND n.timestamp <= datetime({year: 2020, month: 11, day: 01}).epochMillis RETURN n;'
         pr = cProfile.Profile()
         pr.enable()
         with self.driver.session() as session:
@@ -443,8 +503,10 @@ class NNeo4j_Queries:
     def execute_full(self):
         #q1 is complete
         #self.execute_q1()
-        self.execute_q2()
-        self.execute_q3(100000)
+        #q2 is complete
+        #self.execute_q2()
+        #q3 has a bug, come back to it later
+        #self.execute_q3(100000)
         #repeat the other experiments 5 times
         for i in range(6):
             #we get 2407903 records from executing q4
