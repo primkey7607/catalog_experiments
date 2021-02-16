@@ -55,4 +55,5 @@ def extract_times_to_csv(dirname):
     resfile.close()
     
 #extract_times_to_csv('/home/pranav/catalog_experiments/dsqlres')
-extract_times_to_csv('/home/pranav/catalog_experiments/nneo4jres')
+#extract_times_to_csv('/home/pranav/catalog_experiments/nneo4jres')
+extract_times_to_csv('/home/pranav/catalog_experiments/dneo4jres')

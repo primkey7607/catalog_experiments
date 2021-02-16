@@ -169,7 +169,7 @@ class NormImportCreator:
         #NOTE: we left User and WhatProfile off here
         #because we already have these files
         table_order = ['UserType', 'AssetType',
-                       'Asset', 'WhoProfile',
+                       'Asset', 'User', 'WhatProfile', 'WhoProfile',
                        'HowProfile','WhyProfile', 'WhenProfile',
                        'SourceType', 'Source', 'WhereProfile', 
                        'Action', 'RelationshipType', 'Relationship',
@@ -184,12 +184,12 @@ class NormImportCreator:
 
 if __name__ == "__main__":
     nic = NormImportCreator()
-    #nic.create_headers()
-    #nic.create_relheaders()
-    nic.create_bulk_command()
+    nic.create_all_valid_dates()
+    nic.create_headers()
+    nic.create_relheaders()
+    #nic.create_bulk_command()
     #nic.create_valid_dates('baddates/WhatProfile.csv', 'WhatProfile.csv', 'WhatProfile')
     #nic.create_valid_dates('baddates/User.csv', 'User.csv', 'User')
-    #nic.create_all_valid_dates()
                     
             
         

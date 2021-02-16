@@ -474,10 +474,10 @@ class GenNSQLCSV:
 
 
 if __name__ == "__main__":
-    #csv_creator = GenNSQLCSV(10000,10000,5,10000,10000)
+    csv_creator = GenNSQLCSV(10000,10000,5,10000,10000)
     #The above generates a 0.014 GB normalized database
     #And a 0.029 GB datavault database
-    csv_creator = GenNSQLCSV(100000,100000,5,10000,10000)
+    #csv_creator = GenNSQLCSV(100000,100000,5,10000,10000)
     #The above generates 0.129978368 GB normalized
     #0.26914816 GB datavault
     #The below generates a 13.23 GB normalized DB,
@@ -492,4 +492,4 @@ if __name__ == "__main__":
     csv_creator.close_all()
     #Since performing the inserts has a problem, we won't do that for now
     #we'll just generate the CSVs, and then manually import the files
-    csv_creator.perform_inserts()
+    #csv_creator.perform_inserts()

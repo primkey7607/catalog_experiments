@@ -88,31 +88,6 @@ class NNeo4j_Queries:
         
         return query_str
     
-    def make_bulk_query(self, tname):
-        query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
-        query_str1 += " RETURN n"
-        #query_str2 = "MATCH (m:User) WHERE m.id = n.user_id "
-        #query_str2 += "CREATE (n)-[:Rel_WhatProfile_User]->(m)"
-        
-        node_part = ""
-        rel_part = ""
-        for p in self.fkmap[tname]:
-            fk = p[0]
-            fk_name = p[1]
-            var_name = fk_name.lower()
-            node_part += "MATCH (" + var_name + ":" + fk_name + ") WHERE "
-            node_part += var_name + ".id = n." + fk + " "
-            rel_part += "CREATE (n)-[:Rel_" + tname + "_" + fk_name + "]->("
-            rel_part += var_name + ") "
-        
-        query_str2 = node_part + rel_part
-        
-        query_str = 'call apoc.periodic.iterate("' + query_str1 + '", '
-        query_str += '"' + query_str2 + '", {batchSize:1000, params: {props: $props}}) YIELD batches, total, errorMessages return batches, total, errorMessages'
-    
-        print("Going to Execute: " + query_str)
-        return query_str
-    
     def get_lastId(self, tname):
         query_str = "MATCH (n:" + tname + ") RETURN max(n.id) AS max_id;"
         print(query_str)
@@ -273,25 +248,83 @@ class NNeo4j_Queries:
                 recs.append(row)
         
         attrs = self.attrmap[tname]
-        for r in recs:
+        for i,r in enumerate(recs):
             tmpdict = {}
-            for i,a in enumerate(attrs):
+            for j,a in enumerate(attrs):
                 dtype = self.getDataType(a)
                 if dtype == 'int' and 'asset_id' in a:
                     tmpdict[a] = asset_id
                 elif dtype == 'int' and a == 'id':
                     tmpdict[a] = tid + i + 1
                 elif dtype == 'int':
-                    tmpdict[a] = int(r[i])
+                    tmpdict[a] = int(r[j])
                 elif dtype == 'datetime':
-                    dt = datetime.datetime.strptime(r[i], '%Y-%m-%d %H:%M:%S')
+                    dt = datetime.datetime.strptime(r[j], '%Y-%m-%dT%H:%M:%S')
                     nd = DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, float(dt.second))
                     tmpdict[a] = nd
                 else:
-                    tmpdict[a] = r[i]
+                    tmpdict[a] = r[j]
             recmap.append(tmpdict)
         
         return recmap
+    
+    def make_bulk_query(self, tname):
+        query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        query_str1 += " RETURN n"
+        #query_str2 = "MATCH (m:User) WHERE m.id = n.user_id "
+        #query_str2 += "CREATE (n)-[:Rel_WhatProfile_User]->(m)"
+        
+        node_part = ""
+        rel_part = ""
+        for p in self.fkmap[tname]:
+            fk = p[0]
+            fk_name = p[1]
+            var_name = fk_name.lower()
+            node_part += "MATCH (" + var_name + ":" + fk_name + ") WHERE "
+            node_part += var_name + ".id = n." + fk + " "
+            rel_part += "CREATE (n)-[:Rel_" + tname + "_" + fk_name + "]->("
+            rel_part += var_name + ") "
+        
+        query_str2 = node_part + rel_part
+        
+        query_str = 'call apoc.periodic.iterate("' + query_str1 + '", '
+        query_str += '"' + query_str2 + '", {batchSize:1000, params: {props: $props}}) YIELD batches, total, errorMessages return batches, total, errorMessages'
+    
+        print("Going to Execute: " + query_str)
+        return query_str
+    
+    def execute_bulk_query(self, tname, inserts):
+        query_str1 = "UNWIND $props AS map CREATE (n:" + tname + ") SET n = map"
+        query_str1 += " RETURN n.id AS nid"
+        
+        newIdrecs = None
+        pr = cProfile.Profile()
+        pr.enable()
+        with self.driver.session() as session:
+            newIdrecs = session.run(query_str1, props=inserts)
+        
+            newIds = [record["nid"] for record in newIdrecs]
+            #print(newIds)
+            for p in self.fkmap[tname]:
+                fk = p[0]
+                fk_name = p[1]
+                var_name = fk_name.lower()
+                node_part = "MATCH (n:" + tname + "{id: nid}) "
+                node_part += "MATCH (" + var_name + ":" + fk_name + ") WHERE "
+                node_part += var_name + ".id = n." + fk + " "
+                rel_part = "CREATE (n)-[:Rel_" + tname + "_" + fk_name + "]->("
+                rel_part += var_name + ")"
+                rel_query = "UNWIND $nids AS nid " + node_part + rel_part
+                #print("Executing Query: " + rel_query)
+                session.run(rel_query, nids=newIds)
+        
+        pr.disable()
+        s = io.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
+        ps.print_stats()
+        
+        with open('q3_nneo4j_' + tname + '_test.txt', 'w+') as f:
+            f.write(s.getvalue())
         
         
     
@@ -337,7 +370,7 @@ class NNeo4j_Queries:
                 elif dtype == 'int':
                     adict[a] = int(firstrow[i])
                 elif dtype == 'datetime':
-                    dt = datetime.datetime.strptime(firstrow[i], '%Y-%m-%d %H:%M:%S')
+                    dt = datetime.datetime.strptime(firstrow[i], '%Y-%m-%dT%H:%M:%S')
                     nd = DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, float(dt.second))
                     adict[a] = nd
                 else:
@@ -395,38 +428,46 @@ class NNeo4j_Queries:
         # action_relquery6 = self.create_relquery('Action', 'WhyProfile', 'why_id', 'id')
         # action_relquery7 = self.create_relquery('Action', 'WhenProfile', 'when_id', 'id')
         
-        pr = cProfile.Profile()
-        pr.enable()
-        with self.driver.session() as session:
-            session.run(who_query, props=who_inserts)
-            # session.run(who_relquery1)
-            # session.run(who_relquery2)
-            # session.run(who_relquery3)
-            session.run(how_query, props=how_inserts)
-            # session.run(how_relquery1)
-            # session.run(how_relquery2)
-            session.run(why_query, props=why_inserts)
-            # session.run(why_relquery1)
-            # session.run(why_relquery2)
-            session.run(when_query, props=when_inserts)
-            # session.run(when_relquery1)
-            # session.run(when_relquery2)
-            session.run(action_query, props=action_inserts)
-            # session.run(action_relquery1)
-            # session.run(action_relquery2)
-            # session.run(action_relquery3)
-            # session.run(action_relquery4)
-            # session.run(action_relquery5)
-            # session.run(action_relquery6)
-            # session.run(action_relquery7)
+        self.execute_bulk_query(who_name, who_inserts)
+        self.execute_bulk_query(how_name, how_inserts)
+        self.execute_bulk_query(why_name, why_inserts)
+        self.execute_bulk_query(when_name, when_inserts)
+        self.execute_bulk_query(action_name, action_inserts)
         
-        pr.disable()
-        s = io.StringIO()
-        ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
-        ps.print_stats()
+        # pr = cProfile.Profile()
+        # pr.enable()
+        # with self.driver.session() as session:
+        #     session.run(who_query, props=who_inserts)
+        #     # session.run(who_relquery1)
+        #     # session.run(who_relquery2)
+        #     # session.run(who_relquery3)
+        #     #session.run(how_query, props=how_inserts)
+        #     # session.run(how_relquery1)
+        #     # session.run(how_relquery2)
+        #     #session.run(why_query, props=why_inserts)
+        #     # session.run(why_relquery1)
+        #     # session.run(why_relquery2)
+        #     #session.run(when_query, props=when_inserts)
+        #     # session.run(when_relquery1)
+        #     # session.run(when_relquery2)
+        #     #session.run(action_query, props=action_inserts)
+        #     # session.run(action_relquery1)
+        #     # session.run(action_relquery2)
+        #     # session.run(action_relquery3)
+        #     # session.run(action_relquery4)
+        #     # session.run(action_relquery5)
+        #     # session.run(action_relquery6)
+        #     # session.run(action_relquery7)
         
-        with open('q3_nneo4j_test.txt', 'w+') as f:
-            f.write(s.getvalue())
+        # pr.disable()
+        # s = io.StringIO()
+        # ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
+        # ps.print_stats()
+        
+        # with open('q3_nneo4j_test.txt', 'w+') as f:
+        #     f.write(s.getvalue())
+        
+        
     
     def execute_q4(self, trial):
         #query_str = 'WITH datetime({year: 2020, month: 12, day: 20}).epochMillis AS d1 '
@@ -502,21 +543,23 @@ class NNeo4j_Queries:
     
     def execute_full(self):
         #q1 is complete
+        
         #self.execute_q1()
         #q2 is complete
         #self.execute_q2()
         #q3 has a bug, come back to it later
-        #self.execute_q3(100000)
+        self.execute_q3(100000)
         #repeat the other experiments 5 times
-        for i in range(6):
-            #we get 2407903 records from executing q4
-            #drop the cache before executing anything
-            os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
-            time.sleep(5)
-            self.execute_q4(i)
-            self.execute_q5(i)
-            self.execute_q6(i)
-            self.execute_q7(i)
+        #These queries work
+        # for i in range(6):
+        #     #we get 2407903 records from executing q4
+        #     #drop the cache before executing anything
+        #     os.system('echo 1 | sudo tee /proc/sys/vm/drop_caches')
+        #     time.sleep(5)
+        #     self.execute_q4(i)
+        #     self.execute_q5(i)
+        #     self.execute_q6(i)
+        #     self.execute_q7(i)
         
     def close(self):
         self.driver.close()
