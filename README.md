@@ -18,8 +18,10 @@ Bulk import the normalized dataset using the norm_importCreator.py file:
 2. In norm_importCreator.py, make sure that all commands except the last two are uncommented.
 3. Run norm_importCreator.py from the catalog_experiments/ directory (or whichever directory contains the baddates/ directory)
 4. Once norm_importCreator.py is finished running, it should generate:
-a. A new set of csv files, containing both header files, and a clean version of the original data.
-b. a .sh file called 'full_norm_loader.sh'. 
+
+(a) A new set of csv files, containing both header files, and a clean version of the original data.
+(b) a .sh file called 'full_norm_loader.sh'. 
+
 5. Move this new set of csv files into the neo4j-.../import/ directory, and move the .sh file into the neo4j-.../ directory.
 6. Make sure that the --database option in the .sh file matches the name of the database you want to load the files into.
 7. Make this .sh file executable (e.g. "chmod +x") and run it.
@@ -29,8 +31,10 @@ This bulk loads the normalized data. To run the queries, go to the execute_full 
 ### Datavault Database
 Bulk import the datavault dataset by:
 1. Running the dv_importCreator.py in the same directory where the datavault dataset csv files are located. As with the normalized bulk import creator, this will generate:
-a. A new set of csv files, containing both header files, and a clean version of the original data.
-b. a .sh file called 'full_dv_loader.sh'. 
+
+(a) A new set of csv files, containing both header files, and a clean version of the original data.
+(b) a .sh file called 'full_dv_loader.sh'. 
+
 2. Move this new set of csv files into the neo4j-.../import/ directory, and move the .sh file into the neo4j-.../ directory.
 3. Make sure that the --database option in the .sh file matches the name of the database you want to load the files into.
 4. Make this .sh file executable (e.g. "chmod +x") and run it.
