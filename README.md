@@ -1,8 +1,10 @@
 # Catalog Materialization Experiments
 
 These are the experiments we carried out whose results are described in Section V-B of our paper here: https://arxiv.org/abs/2103.07532 (see Table 7 for a summary).
-Below, we describe how to synthesize datasets and populate a 5W1H+R Normalized database, and Data Vault database, on both SQLite and Neo4j backends according to our experimental setup in Section V-B.
+Below, we describe how to synthesize datasets and populate a 5W1H+R Normalized database, and Data Vault database based on schema designs we describe in Section IV of our paper, on both SQLite and Neo4j backends according to our experimental setup in Section V-B.
 We also describe how to execute the queries used in Section V-B.
+
+In addition, to more concisely represent the schemas we use based on the schema designs we propose in Section IV, we have included them using the peewee ORM representation in the backends/ directory.
 
 ## SQLite Instructions
 To generate and populate the SQLite databases and run the queries for both normalized and datavault, we run the scripts in the following order:
