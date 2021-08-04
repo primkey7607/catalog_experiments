@@ -157,7 +157,7 @@ class NNeo4j_Queries:
     
     def execute_q1(self):
         tname = 'WhatProfile'
-        dname = '/home/pranav/catalog_experiments/' + tname
+        dname = tname
         numrows = 0
         last_id = self.get_lastId(tname)
         inserts = []

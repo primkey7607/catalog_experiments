@@ -373,9 +373,9 @@ class DNeo4j_Queries:
         hname = 'H_WhatProfile'
         sname = 'S_WhatProfile_schema'
         lname = 'L_Asset_WhatProfile'
-        hdname = '/home/pranav/catalog_experiments/' + hname
-        sdname = '/home/pranav/catalog_experiments/' + sname
-        ldname = '/home/pranav/catalog_experiments/' + lname
+        hdname = hname
+        sdname = sname
+        ldname = lname
         h_id = self.get_lastId(hname)
         s_id = self.get_lastId(sname)
         l_id = h_id #we don't actually need this to be unique
