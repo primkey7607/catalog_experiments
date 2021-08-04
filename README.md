@@ -1,4 +1,4 @@
-# Catalog Schema Experiments
+# Catalog Materialization Experiments
 
 These are the experiments we carried out whose results are described in Section V-B of the paper here: https://arxiv.org/abs/2103.07532.
 Below, we describe how to synthesize datasets and populate a 5W1H+R Normalized database, and Data Vault database, on both SQLite and Neo4j backends according to our experimental setup in Section V-B.
