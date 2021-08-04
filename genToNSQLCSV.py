@@ -416,7 +416,7 @@ class GenNSQLCSV:
     
     def make_query(self, tname):
         query = 'INSERT INTO ' + tname.lower() + ' VALUES ('
-        con = sqlite3.connect('/home/pranav/catalog_experiments/normalized_synthetic.db')
+        con = sqlite3.connect('normalized_synthetic.db')
         cur = con.cursor()
         schema = cur.execute("PRAGMA table_info('" + tname + "');").fetchall()
         con.close()
