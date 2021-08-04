@@ -5,7 +5,7 @@ Below, we describe how to synthesize datasets and populate a 5W1H+R Normalized d
 We also describe how to execute the queries used in Section V-B.
 
 ## SQLite Instructions
-To generate the SQLite databases and run the queries for both normalized and datavault, we run the scripts in the following order:
+To generate and populate the SQLite databases and run the queries for both normalized and datavault, we run the scripts in the following order:
 ### 5W1H+R Normalized Database
 1. genToNSQLCSV.py: generates the synthetic dataset and populates the normalized database. There are 5 parameters: number of data assets, number of records per table, maximum number of data assets involved in a relationship (rel_size), number of Actions, number of data Sources where data assets are located, and whether the data asset is unique or not. To replicate our paper's experimental setup, use parameters (10000000,10000000,5,10000,10000, False).
 2. nsql_queries.py: executes the experiment queries on the normalized database. To run the full set of queries, uncomment the run_tests.execute_full() command. To run a query separately, uncomment the run_tests.execute_qn() command, where n is the number of the query to run.
@@ -16,7 +16,7 @@ To generate the SQLite databases and run the queries for both normalized and dat
 Note that to run these scripts, you will need SQLite 3.33.0 or higher for the both data generation and query scripts, and the peewee ORM (version 3.13.3 or higher) for the data generation scripts.
 
 ## Neo4j Instructions
-To generate the neo4j databases, we need two datasets:
+To generate and populate the neo4j databases, we need two datasets:
 1. The normalized dataset which we generated for SQLite.
 2. The datavault dataset, which will be created from the normalized dataset.
 
